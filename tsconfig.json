@@ -7,5 +7,10 @@
         "strict": true,
         "rootDir": "lib",
         "jsx" : "react"
-    }
+    },
+    "exclude": [
+        "./__tests__",
+        "dist",
+        "node_modules"
+    ]
 }

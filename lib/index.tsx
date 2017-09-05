@@ -21,7 +21,7 @@ import Analytics from './analytics';
 
 type predicate = (obj: any) => boolean
 type dispatcherFactory = () => shisell.AnalyticsDispatcher
-type TransformAnalyticsFunc = (dispatcher: shisell.AnalyticsDispatcher, otherProps: any) => shisell.AnalyticsDispatcher;
+export type TransformAnalyticsFunc = (dispatcher: shisell.AnalyticsDispatcher, otherProps: any) => shisell.AnalyticsDispatcher;
 type propsWithAnalytics = { analytics: { dispatcher: shisell.AnalyticsDispatcher } }
 type propsToExtras = (props: object) => object
 
