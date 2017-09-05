@@ -2,8 +2,28 @@
   "name": "react-shisell",
   "version": "0.0.1",
   "description": "React HoC which add analytics to your components using shisell-js",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "repository": "https://github.com/Soluto/react-shisell",
   "author": "Soluto",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "prepublish": "npm run build",
+    "build": "tsc",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^21.0.1",
+    "typescript": "^2.5.2"
+  },
+  "dependencies": {
+    "@types/prop-types": "^15.5.1",
+    "@types/react": "^16.0.5",
+    "@types/recompose": "^0.24.1",
+    "prop-types": "^15.5.10",
+    "react": "^15.6.1",
+    "recompose": "^0.25.0",
+    "rxjs": "^5.4.3",
+    "shisell": "^0.3.2"
+  }
 }
