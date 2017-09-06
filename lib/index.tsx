@@ -58,9 +58,14 @@ export const withoutAnalytics = mapProps(({ analytics, ...otherProps }) => other
 export const setAnalyticsScope = (transformAnalyticsFunc: TransformAnalyticsFunc) =>
     compose(
         withAnalytics,
-        withContext(analyticsContextTypes, ({ analytics = defaultLazyAnalytics, ...otherProps }) => ({
-            analytics: new LazyAnalytics(() => transformAnalyticsFunc(analytics.dispatcher, otherProps)),
-        })),
+        withContext(
+            analyticsContextTypes,
+            ({ analytics = defaultLazyAnalytics, ...otherProps }) => ({
+                analytics: new LazyAnalytics(() =>
+                    transformAnalyticsFunc(analytics.dispatcher, otherProps)
+                ),
+            })
+        ),
         withoutAnalytics
     );
 
@@ -73,11 +78,16 @@ export const withViewAnalytic = (where: predicate, propsToExtras: propsToExtras 
         withoutAnalytics
     );
 
-export const withViewAnalyticOnPropChange = (propNames: Array<string>, where: predicate, propsToExtras: propsToExtras = () => ({})) =>
+export const withViewAnalyticOnPropChange = (
+    propNames: Array<string>,
+    where: predicate,
+    propsToExtras: propsToExtras = () => ({})
+) =>
     compose(
         withAnalytics,
         withPropsOnChange(propNames, ({ analytics, ...otherProps }) => {
-            if (where(otherProps)) analytics.dispatcher.withExtras(propsToExtras(otherProps)).dispatch('View');
+            if (where(otherProps))
+                analytics.dispatcher.withExtras(propsToExtras(otherProps)).dispatch('View');
         }),
         withoutAnalytics
     );
@@ -97,17 +107,17 @@ export const withAnalyticOnEvent = (
                 identities = {},
                 analytics,
                 extrasProps,
-                ...props
+                ...props,
             }) => (e: object) => {
-                    if (predicate(e, props)) {
-                        analytics.dispatcher
-                            .withIdentities(identities)
-                            .withExtras(extras)
-                            .withExtras(propsToExtras(props, extrasProps))
-                            .dispatch(analyticName);
-                    }
-                    onEvent && onEvent(e);
-                },
+                if (predicate(e, props)) {
+                    analytics.dispatcher
+                        .withIdentities(identities)
+                        .withExtras(extras)
+                        .withExtras(propsToExtras(props, extrasProps))
+                        .dispatch(analyticName);
+                }
+                onEvent && onEvent(e);
+            },
         }),
         mapProps(({ extras, identities, extrasProps, ...otherProps }) => otherProps),
         withoutAnalytics
@@ -121,9 +131,9 @@ const doOnFirstChangeProps = (changedPropName: string, valueBeforeChange: any, v
             rxStream,
             rxStream.pairwise()
                 .filter(
-                (propsPair: Array<{ [key: string]: any }>) =>
-                    propsPair[0][changedPropName] === valueBeforeChange &&
-                    propsPair[1][changedPropName] === valueAfterChange
+                    (propsPair: Array<{ [key: string]: any }>) =>
+                        propsPair[0][changedPropName] === valueBeforeChange &&
+                        propsPair[1][changedPropName] === valueAfterChange
                 )
                 .take(1)
                 .do((propsPair: Array<object>) => doFunc(propsPair[1]))
@@ -141,8 +151,12 @@ export const withOnFirstChangeAnalytic = (
 ) =>
     compose(
         withAnalytics,
-        doOnFirstChangeProps(changedPropName, valueBeforeChange, valueAfterChange, ({ analytics, ...otherProps }) =>
-            analytics.dispatcher.withExtras(propsToExtras(otherProps)).dispatch(analyticName)
+        doOnFirstChangeProps(
+            changedPropName,
+            valueBeforeChange,
+            valueAfterChange,
+            ({ analytics, ...otherProps }) =>
+                analytics.dispatcher.withExtras(propsToExtras(otherProps)).dispatch(analyticName)
         ),
         withoutAnalytics
     );
@@ -156,9 +170,9 @@ const doOnChangeProps = (changedPropName: string, valueBeforeChangeFilter: any, 
             rxStream
                 .pairwise()
                 .filter(
-                (propsPair: Array<{ [key: string]: any }>) =>
-                    valueBeforeChangeFilter(propsPair[0][changedPropName]) &&
-                    valueAfterChangeFilter(propsPair[1][changedPropName])
+                    (propsPair: Array<{ [key: string]: any }>) =>
+                        valueBeforeChangeFilter(propsPair[0][changedPropName]) &&
+                        valueAfterChangeFilter(propsPair[1][changedPropName])
                 )
                 .do((propsPair: Array<object>) => doFunc(propsPair[1]))
                 .startWith(null),
@@ -186,7 +200,10 @@ export const withOnChangeAnalytic = (
         withoutAnalytics
     );
 
-export const withDispatchOnceAnalytic = (analyticName: string, propsToExtras: propsToExtras = () => ({})) =>
+export const withDispatchOnceAnalytic = (
+    analyticName: string,
+    propsToExtras: propsToExtras = () => ({})
+) =>
     compose(
         withAnalytics,
         doOnFirstProps(
@@ -208,19 +225,15 @@ export const withTimeOnPageAnalytic = (analyticName: string) => {
             componentWillUnmount() {
                 const timeOnPageMs = Date.now() - this.mountTimestamp;
                 const timeOnPageSec = timeOnPageMs / 1000;
-                this.props.analytics.dispatcher.withExtra(analyticName, timeOnPageSec).dispatch(analyticName);
+                this.props.analytics.dispatcher
+                    .withExtra(analyticName, timeOnPageSec)
+                    .dispatch(analyticName);
             }
 
             render() {
                 return <Comp {...this.props} />;
             }
-        }
-}
+        };
+};
 
-
-
-compose(
-    withAnalytics,
-    withTimeOnPageAnalytic,
-    withoutAnalytics
-);
+compose(withAnalytics, withTimeOnPageAnalytic, withoutAnalytics);
