@@ -1,7 +1,7 @@
 import * as PropTypes from 'prop-types';
 import * as React from 'react';
 import * as shisell from 'shisell';
-import * as rx from 'rxjs';
+import { Observable } from 'rxjs';
 import rxjsconfig from 'recompose/rxjsObservableConfig';
 
 import {
@@ -21,24 +21,30 @@ import {
 
 import Analytics from './analytics';
 
-export const analytics = Analytics;
+type Predicate = (obj: any) => boolean;
+type DispatcherFactory = () => shisell.AnalyticsDispatcher;
+export type TransformAnalyticsFunc = (
+    dispatcher: shisell.AnalyticsDispatcher,
+    otherProps: any
+) => shisell.AnalyticsDispatcher;
+type AnalyticsProps = { analytics: { dispatcher: shisell.AnalyticsDispatcher } };
+type MapPropsToExtras = (props: object) => object;
 
-type predicate = (obj: any) => boolean
-type dispatcherFactory = () => shisell.AnalyticsDispatcher
-export type TransformAnalyticsFunc = (dispatcher: shisell.AnalyticsDispatcher, otherProps: any) => shisell.AnalyticsDispatcher;
-type propsWithAnalytics = { analytics: { dispatcher: shisell.AnalyticsDispatcher } }
-type propsToExtras = (props: object) => object
-
-const doOnFirstProps = (filter: predicate, onFirstProps: (props: propsWithAnalytics) => {}) =>
-    mapPropsStreamWithConfig(rxjsconfig)(props$ => {
-        const rxStream = props$ as rx.Observable<{}>;
-        const onFirstProps$ = rxStream.first(filter).do(onFirstProps).ignoreElements();
-        return rx.Observable.merge(rxStream, onFirstProps$);
+const doOnFirstProps = <T extends AnalyticsProps>(
+    filter: Predicate,
+    onFirstProps: (props: T) => void
+) =>
+    mapPropsStreamWithConfig<T, T>(rxjsconfig)(props$ => {
+        const onFirstProps$ = (props$ as Observable<T>)
+            .first(filter)
+            .do(onFirstProps)
+            .ignoreElements();
+        return Observable.merge(props$, onFirstProps$);
     });
 
 const LazyAnalytics = class {
-    dispatcherFactory: dispatcherFactory;
-    constructor(dispatcherFactory: dispatcherFactory) {
+    dispatcherFactory: DispatcherFactory;
+    constructor(dispatcherFactory: DispatcherFactory) {
         this.dispatcherFactory = dispatcherFactory;
     }
     get dispatcher() {
@@ -52,7 +58,7 @@ export const analyticsContextTypes = {
     analytics: PropTypes.object,
 };
 
-export const withAnalytics = getContext(analyticsContextTypes);
+export const withAnalytics = getContext<AnalyticsProps>(analyticsContextTypes);
 export const withoutAnalytics = mapProps(({ analytics, ...otherProps }) => otherProps);
 
 export const setAnalyticsScope = (transformAnalyticsFunc: TransformAnalyticsFunc) =>
@@ -69,7 +75,7 @@ export const setAnalyticsScope = (transformAnalyticsFunc: TransformAnalyticsFunc
         withoutAnalytics
     );
 
-export const withViewAnalytic = (where: predicate, propsToExtras: propsToExtras = () => ({})) =>
+export const withViewAnalytic = (where: Predicate, propsToExtras: MapPropsToExtras = () => ({})) =>
     compose(
         withAnalytics,
         doOnFirstProps(where, ({ analytics, ...otherProps }) =>
@@ -80,8 +86,8 @@ export const withViewAnalytic = (where: predicate, propsToExtras: propsToExtras 
 
 export const withViewAnalyticOnPropChange = (
     propNames: Array<string>,
-    where: predicate,
-    propsToExtras: propsToExtras = () => ({})
+    where: Predicate,
+    propsToExtras: MapPropsToExtras = () => ({})
 ) =>
     compose(
         withAnalytics,
@@ -147,7 +153,7 @@ export const withOnFirstChangeAnalytic = (
     valueBeforeChange: any,
     valueAfterChange: any,
     analyticName: string,
-    propsToExtras: propsToExtras = () => ({})
+    propsToExtras: MapPropsToExtras = () => ({})
 ) =>
     compose(
         withAnalytics,
@@ -186,7 +192,7 @@ export const withOnChangeAnalytic = (
     valueBeforeChangeFilter: any,
     valueAfterChangeFilter: any,
     analyticName: string,
-    propsToExtras: propsToExtras = () => ({})
+    propsToExtras: MapPropsToExtras = () => ({})
 ) =>
     compose(
         withAnalytics,
@@ -202,7 +208,7 @@ export const withOnChangeAnalytic = (
 
 export const withDispatchOnceAnalytic = (
     analyticName: string,
-    propsToExtras: propsToExtras = () => ({})
+    propsToExtras: MapPropsToExtras = () => ({})
 ) =>
     compose(
         withAnalytics,
@@ -216,7 +222,7 @@ export const withDispatchOnceAnalytic = (
 
 export const withTimeOnPageAnalytic = (analyticName: string) => {
     return (Comp: new () => React.Component<any, any>) =>
-        class ComponentWithTimeOnPageAnalytics extends React.Component<propsWithAnalytics> {
+        class ComponentWithTimeOnPageAnalytics extends React.Component<AnalyticsProps> {
             mountTimestamp: number;
 
             componentDidMount() {
@@ -235,5 +241,3 @@ export const withTimeOnPageAnalytic = (analyticName: string) => {
             }
         };
 };
-
-compose(withAnalytics, withTimeOnPageAnalytic, withoutAnalytics);
