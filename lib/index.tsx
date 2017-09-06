@@ -15,32 +15,20 @@ import {
     InferableComponentEnhancerWithProps,
     ComponentEnhancer,
     mapPropsStreamWithConfig,
-    Subscription
+    Subscription,
 } from 'recompose';
-
 
 import Analytics from './analytics';
 
-type Predicate = (obj: any) => boolean;
+import { Predicate, AnalyticsProps } from './models';
+import doOnFirstProps from './modules/doOnFirstProps';
+
 type DispatcherFactory = () => shisell.AnalyticsDispatcher;
 export type TransformAnalyticsFunc = (
     dispatcher: shisell.AnalyticsDispatcher,
     otherProps: any
 ) => shisell.AnalyticsDispatcher;
-type AnalyticsProps = { analytics: { dispatcher: shisell.AnalyticsDispatcher } };
 type MapPropsToExtras = (props: object) => object;
-
-const doOnFirstProps = <T extends AnalyticsProps>(
-    filter: Predicate,
-    onFirstProps: (props: T) => void
-) =>
-    mapPropsStreamWithConfig<T, T>(rxjsconfig)(props$ => {
-        const onFirstProps$ = (props$ as Observable<T>)
-            .first(filter)
-            .do(onFirstProps)
-            .ignoreElements();
-        return Observable.merge(props$, onFirstProps$);
-    });
 
 const LazyAnalytics = class {
     dispatcherFactory: DispatcherFactory;
@@ -129,13 +117,19 @@ export const withAnalyticOnEvent = (
         withoutAnalytics
     );
 
-const doOnFirstChangeProps = (changedPropName: string, valueBeforeChange: any, valueAfterChange: any, doFunc: (prop: any) => void) =>
+const doOnFirstChangeProps = (
+    changedPropName: string,
+    valueBeforeChange: any,
+    valueAfterChange: any,
+    doFunc: (prop: any) => void
+) =>
     mapPropsStreamWithConfig(rxjsconfig)(props$ => {
-        const rxStream = props$ as rx.Observable<{}>;
+        const rxStream = props$ as Observable<{}>;
 
-        return rx.Observable.combineLatest(
+        return Observable.combineLatest(
             rxStream,
-            rxStream.pairwise()
+            rxStream
+                .pairwise()
                 .filter(
                     (propsPair: Array<{ [key: string]: any }>) =>
                         propsPair[0][changedPropName] === valueBeforeChange &&
@@ -145,7 +139,7 @@ const doOnFirstChangeProps = (changedPropName: string, valueBeforeChange: any, v
                 .do((propsPair: Array<object>) => doFunc(propsPair[1]))
                 .startWith(null),
             (props, _) => props
-        )
+        );
     });
 
 export const withOnFirstChangeAnalytic = (
@@ -167,11 +161,16 @@ export const withOnFirstChangeAnalytic = (
         withoutAnalytics
     );
 
-const doOnChangeProps = (changedPropName: string, valueBeforeChangeFilter: any, valueAfterChangeFilter: any, doFunc: (prop: any) => void) =>
+const doOnChangeProps = (
+    changedPropName: string,
+    valueBeforeChangeFilter: any,
+    valueAfterChangeFilter: any,
+    doFunc: (prop: any) => void
+) =>
     mapPropsStreamWithConfig(rxjsconfig)(props$ => {
-        const rxStream = props$ as rx.Observable<{}>;
+        const rxStream = props$ as Observable<{}>;
 
-        return rx.Observable.combineLatest(
+        return Observable.combineLatest(
             rxStream,
             rxStream
                 .pairwise()
@@ -183,9 +182,8 @@ const doOnChangeProps = (changedPropName: string, valueBeforeChangeFilter: any, 
                 .do((propsPair: Array<object>) => doFunc(propsPair[1]))
                 .startWith(null),
             (props, _) => props
-        )
-    }
-    );
+        );
+    });
 
 export const withOnChangeAnalytic = (
     changedPropName: string,

@@ -1,2 +1,4 @@
 lib/
 __tests__
+yarn-error.log
+.git
