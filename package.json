@@ -37,17 +37,11 @@
         "shisell": "^0.3.2"
     },
     "jest": {
-        "moduleFileExtensions": [
-            "ts",
-            "tsx",
-            "js"
-        ],
+        "moduleFileExtensions": ["ts", "tsx", "js"],
         "transform": {
             "^.+\\.(ts|tsx)$": "<rootDir>/preprocessor.js"
         },
-        "testMatch": [
-            "<rootDir>/__tests__/*.spec.(ts|tsx|js)"
-        ]
+        "testMatch": ["**/__tests__/**/*.{js,ts}?(x)", "**/?(*.)(spec|test).{js,ts}?(x)"]
     },
     "lint-staged": {
         "**/*.{js,ts,tsx}": [

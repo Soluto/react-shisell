@@ -7,7 +7,7 @@ const doOnFirstProps = <T extends AnalyticsProps>(
     filter: Predicate,
     onFirstProps: (props: T) => void
 ) =>
-    mapPropsStream(props$ => {
+    mapPropsStream<T, T>(props$ => {
         const onFirstProps$ = (props$ as Observable<T>)
             .first(filter)
             .do(onFirstProps)
