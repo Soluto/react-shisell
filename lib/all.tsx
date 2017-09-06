@@ -117,31 +117,6 @@ export const withAnalyticOnEvent = (
         withoutAnalytics
     );
 
-const doOnFirstChangeProps = (
-    changedPropName: string,
-    valueBeforeChange: any,
-    valueAfterChange: any,
-    doFunc: (prop: any) => void
-) =>
-    mapPropsStreamWithConfig(rxjsconfig)(props$ => {
-        const rxStream = props$ as Observable<{}>;
-
-        return Observable.combineLatest(
-            rxStream,
-            rxStream
-                .pairwise()
-                .filter(
-                    (propsPair: Array<{ [key: string]: any }>) =>
-                        propsPair[0][changedPropName] === valueBeforeChange &&
-                        propsPair[1][changedPropName] === valueAfterChange
-                )
-                .take(1)
-                .do((propsPair: Array<object>) => doFunc(propsPair[1]))
-                .startWith(null),
-            (props, _) => props
-        );
-    });
-
 export const withOnFirstChangeAnalytic = (
     changedPropName: string,
     valueBeforeChange: any,
