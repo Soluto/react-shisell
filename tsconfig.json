@@ -10,6 +10,7 @@
     },
     "exclude": [
         "./__tests__",
+        "./lib/__mocks__",
         "dist",
         "node_modules"
     ]
