@@ -21,6 +21,8 @@ import {
 
 import Analytics from './analytics';
 
+export const analytics = Analytics;
+
 type predicate = (obj: any) => boolean
 type dispatcherFactory = () => shisell.AnalyticsDispatcher
 export type TransformAnalyticsFunc = (dispatcher: shisell.AnalyticsDispatcher, otherProps: any) => shisell.AnalyticsDispatcher;
@@ -49,6 +51,7 @@ const defaultLazyAnalytics = new LazyAnalytics(() => Analytics.dispatcher);
 export const analyticsContextTypes = {
     analytics: PropTypes.object,
 };
+
 export const withAnalytics = getContext(analyticsContextTypes);
 export const withoutAnalytics = mapProps(({ analytics, ...otherProps }) => otherProps);
 
@@ -198,10 +201,6 @@ export const withTimeOnPageAnalytic = (analyticName: string) => {
     return (Comp: new () => React.Component<any, any>) =>
         class ComponentWithTimeOnPageAnalytics extends React.Component<propsWithAnalytics> {
             mountTimestamp: number;
-
-            constructor(props: any) {
-                super(props)
-            }
 
             componentDidMount() {
                 this.mountTimestamp = Date.now();
