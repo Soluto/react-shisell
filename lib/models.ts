@@ -1,3 +1,9 @@
 import { AnalyticsDispatcher } from 'shisell';
-export type Predicate = (obj: any) => boolean;
+import * as PropTypes from 'prop-types';
+
+export type Predicate<T = any> = (value: T) => boolean;
 export type AnalyticsProps = { analytics: { dispatcher: AnalyticsDispatcher } };
+export type MapPropsToExtras = (props: object) => object;
+export const analyticsContextTypes = {
+    analytics: PropTypes.object,
+};

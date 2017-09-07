@@ -20,15 +20,16 @@ import {
 
 import Analytics from './analytics';
 
-import { Predicate, AnalyticsProps } from './models';
+import { Predicate, AnalyticsProps, MapPropsToExtras, analyticsContextTypes } from './models';
 import doOnFirstProps from './modules/doOnFirstProps';
+import doOnChangeProps from './modules/doOnChangeProps';
+import { withAnalytics, withoutAnalytics } from './modules/withAnalytics';
 
 type DispatcherFactory = () => shisell.AnalyticsDispatcher;
 export type TransformAnalyticsFunc = (
     dispatcher: shisell.AnalyticsDispatcher,
     otherProps: any
 ) => shisell.AnalyticsDispatcher;
-type MapPropsToExtras = (props: object) => object;
 
 const LazyAnalytics = class {
     dispatcherFactory: DispatcherFactory;
@@ -41,13 +42,6 @@ const LazyAnalytics = class {
 };
 //returns shisel's root analytics dispatcher
 const defaultLazyAnalytics = new LazyAnalytics(() => Analytics.dispatcher);
-
-export const analyticsContextTypes = {
-    analytics: PropTypes.object,
-};
-
-export const withAnalytics = getContext<AnalyticsProps>(analyticsContextTypes);
-export const withoutAnalytics = mapProps(({ analytics, ...otherProps }) => otherProps);
 
 export const setAnalyticsScope = (transformAnalyticsFunc: TransformAnalyticsFunc) =>
     compose(
@@ -155,49 +149,6 @@ export const withOnFirstChangeAnalytic = (
             changedPropName,
             valueBeforeChange,
             valueAfterChange,
-            ({ analytics, ...otherProps }) =>
-                analytics.dispatcher.withExtras(propsToExtras(otherProps)).dispatch(analyticName)
-        ),
-        withoutAnalytics
-    );
-
-const doOnChangeProps = (
-    changedPropName: string,
-    valueBeforeChangeFilter: any,
-    valueAfterChangeFilter: any,
-    doFunc: (prop: any) => void
-) =>
-    mapPropsStreamWithConfig(rxjsconfig)(props$ => {
-        const rxStream = props$ as Observable<{}>;
-
-        return Observable.combineLatest(
-            rxStream,
-            rxStream
-                .pairwise()
-                .filter(
-                    (propsPair: Array<{ [key: string]: any }>) =>
-                        valueBeforeChangeFilter(propsPair[0][changedPropName]) &&
-                        valueAfterChangeFilter(propsPair[1][changedPropName])
-                )
-                .do((propsPair: Array<object>) => doFunc(propsPair[1]))
-                .startWith(null),
-            (props, _) => props
-        );
-    });
-
-export const withOnChangeAnalytic = (
-    changedPropName: string,
-    valueBeforeChangeFilter: any,
-    valueAfterChangeFilter: any,
-    analyticName: string,
-    propsToExtras: MapPropsToExtras = () => ({})
-) =>
-    compose(
-        withAnalytics,
-        doOnChangeProps(
-            changedPropName,
-            valueBeforeChangeFilter,
-            valueAfterChangeFilter,
             ({ analytics, ...otherProps }) =>
                 analytics.dispatcher.withExtras(propsToExtras(otherProps)).dispatch(analyticName)
         ),

@@ -1,7 +1,6 @@
 import * as React from 'React';
 import { Requireable } from 'prop-types';
-import { AnalyticsProps } from '../models';
-import { analyticsContextTypes } from '../all';
+import { AnalyticsProps, analyticsContextTypes } from '../models';
 
 const withTimeOnPageAnalytic = (analyticName: string) => {
     return <T extends {}>(WrappedComponent: React.ComponentType<T>) =>
