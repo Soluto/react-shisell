@@ -7,3 +7,7 @@ export type MapPropsToExtras<T extends {} = {}> = (props: T) => object;
 export const analyticsContextTypes = {
     analytics: PropTypes.object,
 };
+export type TransformAnalytics<T extends {}> = (
+    dispatcher: AnalyticsDispatcher,
+    props: T
+) => AnalyticsDispatcher;

@@ -18,44 +18,10 @@ import {
     Subscription,
 } from 'recompose';
 
-import Analytics from './analytics';
-
 import { Predicate, AnalyticsProps, MapPropsToExtras, analyticsContextTypes } from './models';
 import doOnFirstProps from './modules/doOnFirstProps';
 import doOnChangeProps from './modules/doOnChangeProps';
 import { withAnalytics, withoutAnalytics } from './modules/withAnalytics';
-
-type DispatcherFactory = () => shisell.AnalyticsDispatcher;
-export type TransformAnalyticsFunc = (
-    dispatcher: shisell.AnalyticsDispatcher,
-    otherProps: any
-) => shisell.AnalyticsDispatcher;
-
-const LazyAnalytics = class {
-    dispatcherFactory: DispatcherFactory;
-    constructor(dispatcherFactory: DispatcherFactory) {
-        this.dispatcherFactory = dispatcherFactory;
-    }
-    get dispatcher() {
-        return this.dispatcherFactory();
-    }
-};
-//returns shisel's root analytics dispatcher
-const defaultLazyAnalytics = new LazyAnalytics(() => Analytics.dispatcher);
-
-export const setAnalyticsScope = (transformAnalyticsFunc: TransformAnalyticsFunc) =>
-    compose(
-        withAnalytics,
-        withContext(
-            analyticsContextTypes,
-            ({ analytics = defaultLazyAnalytics, ...otherProps }) => ({
-                analytics: new LazyAnalytics(() =>
-                    transformAnalyticsFunc(analytics.dispatcher, otherProps)
-                ),
-            })
-        ),
-        withoutAnalytics
-    );
 
 export const withViewAnalytic = (where: Predicate, propsToExtras: MapPropsToExtras = () => ({})) =>
     compose(

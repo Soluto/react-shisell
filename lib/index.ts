@@ -1,3 +1,4 @@
+import setAnalyticsScope from './modules/setAnalyticsScope';
 import withDispatchOnceAnalytic from './modules/withDispatchOnceAnalytic';
 import withOnChangeAnalytic from './modules/withOnChangeAnalytic';
 import withTimeOnPageAnalytic from './modules/withTimeOnPageAnalytic';
@@ -10,4 +11,5 @@ export {
     analyticsContextTypes,
     withOnChangeAnalytic,
     withDispatchOnceAnalytic,
+    setAnalyticsScope,
 };
