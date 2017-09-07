@@ -4,7 +4,7 @@ import { Predicate, AnalyticsProps } from '../models';
 import mapPropsStream from '../utils/mapPropsStream';
 
 const doOnFirstProps = <T extends AnalyticsProps>(
-    filter: Predicate,
+    filter: Predicate<T>,
     onFirstProps: (props: T) => void
 ) =>
     mapPropsStream<T, T>(props$ => {

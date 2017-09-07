@@ -154,17 +154,3 @@ export const withOnFirstChangeAnalytic = (
         ),
         withoutAnalytics
     );
-
-export const withDispatchOnceAnalytic = (
-    analyticName: string,
-    propsToExtras: MapPropsToExtras = () => ({})
-) =>
-    compose(
-        withAnalytics,
-        doOnFirstProps(
-            props => props,
-            ({ analytics, ...otherProps }) =>
-                analytics.dispatcher.withExtras(propsToExtras(otherProps)).dispatch(analyticName)
-        ),
-        withoutAnalytics
-    );
