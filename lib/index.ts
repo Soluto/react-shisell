@@ -1,3 +1,4 @@
+import withViewAnalytic from './modules/withViewAnalytic';
 import setAnalyticsScope from './modules/setAnalyticsScope';
 import withDispatchOnceAnalytic from './modules/withDispatchOnceAnalytic';
 import withOnChangeAnalytic from './modules/withOnChangeAnalytic';
@@ -12,4 +13,5 @@ export {
     withOnChangeAnalytic,
     withDispatchOnceAnalytic,
     setAnalyticsScope,
+    withViewAnalytic,
 };

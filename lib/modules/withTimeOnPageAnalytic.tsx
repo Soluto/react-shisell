@@ -3,8 +3,8 @@ import { Requireable } from 'prop-types';
 import { AnalyticsProps, analyticsContextTypes } from '../models';
 
 const withTimeOnPageAnalytic = (analyticName: string) => {
-    return <T extends {}>(WrappedComponent: React.ComponentType<T>) =>
-        class ComponentWithTimeOnPageAnalytics extends React.Component {
+    return <TProps extends {}>(WrappedComponent: React.ComponentType<TProps>) =>
+        class ComponentWithTimeOnPageAnalytics extends React.Component<TProps> {
             mountTimestamp: number;
             context: AnalyticsProps;
 

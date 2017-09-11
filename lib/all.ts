@@ -23,15 +23,6 @@ import doOnFirstProps from './modules/doOnFirstProps';
 import doOnChangeProps from './modules/doOnChangeProps';
 import { withAnalytics, withoutAnalytics } from './modules/withAnalytics';
 
-export const withViewAnalytic = (where: Predicate, propsToExtras: MapPropsToExtras = () => ({})) =>
-    compose(
-        withAnalytics,
-        doOnFirstProps(where, ({ analytics, ...otherProps }) =>
-            analytics.dispatcher.withExtras(propsToExtras(otherProps)).dispatch('View')
-        ),
-        withoutAnalytics
-    );
-
 export const withViewAnalyticOnPropChange = (
     propNames: Array<string>,
     where: Predicate,
