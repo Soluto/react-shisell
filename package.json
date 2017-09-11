@@ -34,14 +34,21 @@
         "react": "^15.6.1",
         "recompose": "^0.25.0",
         "rxjs": "^5.4.3",
-        "shisell": "^0.3.2"
+        "shisell": "^0.4.1"
     },
     "jest": {
-        "moduleFileExtensions": ["ts", "tsx", "js"],
+        "moduleFileExtensions": [
+            "ts",
+            "tsx",
+            "js"
+        ],
         "transform": {
             "^.+\\.(ts|tsx)$": "<rootDir>/preprocessor.js"
         },
-        "testMatch": ["**/__tests__/**/*.{js,ts}?(x)", "**/?(*.)(spec|test).{js,ts}?(x)"]
+        "testMatch": [
+            "**/__tests__/**/*.{js,ts}?(x)",
+            "**/?(*.)(spec|test).{js,ts}?(x)"
+        ]
     },
     "lint-staged": {
         "**/*.{js,ts,tsx}": [
