@@ -2,7 +2,7 @@ jest.mock('../lib/analytics');
 import Analytics from '../lib/analytics';
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
-import { setAnalyticsScope, withAnalytics, TransformAnalyticsFunc } from '../lib/index';
+import { enrichAnalytics, withAnalytics, analytics } from '../lib/index';
 
 import * as PropTypes from 'prop-types';
 import * as shisell from 'shisell';
@@ -16,7 +16,7 @@ const AnalyticsDispatchingComponent: React.StatelessComponent<propsWithAnalytics
     return <div />;
 };
 
-describe('setAnalyticsScope', () => {
+describe('enrichAnalytics', () => {
     beforeEach(function () {
         sinon.spy(Analytics.dispatcher, 'createScoped');
     });
@@ -25,12 +25,12 @@ describe('setAnalyticsScope', () => {
         (Analytics.dispatcher.createScoped as sinon.SinonSpy).restore();
     });
 
-    const transformAnalyticsFunc: TransformAnalyticsFunc = dispatcher => {
+    const transformAnalyticsFunc = dispatcher => {
         return dispatcher.createScoped('IdanScope');
     };
 
     it('applies the dispatcher transformation before dispatch is called', () => {
-        const EnhancedComponent = compose(setAnalyticsScope(transformAnalyticsFunc), withAnalytics)(
+        const EnhancedComponent = compose(enrichAnalytics(transformAnalyticsFunc), withAnalytics)(
             AnalyticsDispatchingComponent
         );
 
@@ -43,7 +43,7 @@ describe('setAnalyticsScope', () => {
 
     it('does not apply the dispatcher transformation if dispatch is not called', () => {
         const Component = () => <div />
-        const EnhancedComponent = compose(setAnalyticsScope(transformAnalyticsFunc), withAnalytics)(Component);
+        const EnhancedComponent = compose(enrichAnalytics(transformAnalyticsFunc), withAnalytics)(Component);
 
         const result = renderer.create(<EnhancedComponent />);
 
