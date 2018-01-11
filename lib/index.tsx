@@ -8,7 +8,7 @@ import { ComponentEnhancer, InferableComponentEnhancerWithProps } from 'recompos
 export * from './HOC/analytics-context-types';
 export * from './HOC/with-analytics';
 export * from './HOC/without-analytics';
-export * from './HOC/enrich-analytics';
+export {enrichAnalytics} from './HOC/enrich-analytics';
 export * from './HOC/with-analytic-on-event';
 export * from './HOC/with-analytic-on-mount';
 export * from './HOC/with-on-prop-changed-analytic';
