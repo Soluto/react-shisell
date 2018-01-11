@@ -2,7 +2,7 @@ import { compose, mapPropsStreamWithConfig, ComponentEnhancer } from 'recompose'
 import { Observable } from 'rxjs';
 import rxjsconfig from 'recompose/rxjsObservableConfig';
 
-import { propsToExtras } from './types';
+import { TransformPropsFunc } from './types';
 import { withAnalytics } from './with-analytics';
 import { withoutAnalytics } from './without-analytics';
 
@@ -31,7 +31,7 @@ export const withOnPropChangedAnalytic = (
     valueBeforeChangeFilter: any,
     valueAfterChangeFilter: any,
     analyticName: string,
-    propsToExtras: propsToExtras = () => ({})) =>
+    propsToExtras: TransformPropsFunc = () => ({})) =>
     compose(
         withAnalytics,
         doOnChangeProps(
