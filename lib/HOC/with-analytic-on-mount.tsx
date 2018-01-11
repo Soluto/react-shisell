@@ -9,7 +9,7 @@ const defaultPropsToExtrasMapper = () => ({});
 export const withAnalyticOnMount = (
     analyticName: string,
     mapPropsToExtras: TransformPropsFunc = defaultPropsToExtrasMapper
-) => <P extends {}>(InnerComponent: React.ComponentClass<P> | React.StatelessComponent<P>) =>
+) => <P extends {}>(InnerComponent: React.ComponentType<P>) =>
     class WithAnalyticOnMount extends React.Component<P> {
         context: AnalyticsContext;
 
