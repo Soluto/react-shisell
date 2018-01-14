@@ -1,8 +1,10 @@
 import * as React from 'react';
 import {Requireable} from 'prop-types';
 
-import {TransformPropsFunc, Predicate2} from './types';
-import analyticsContextTypes, {AnalyticsContext} from './analytics-context-types';
+import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
+
+type Predicate2 = (val1: any, val2: any) => boolean;
+type TransformPropsFunc = (props: object) => object;
 
 const defaultMapPropsToExtras = () => ({});
 

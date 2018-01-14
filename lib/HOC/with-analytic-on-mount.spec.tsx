@@ -11,7 +11,7 @@ import Analytics from '../analytics';
 import {runImmediate} from '../testUtils';
 
 const Empty = () => null;
-const identity = <T extends {}>(f: T) => f;
+const identity = <T extends any>(f: T) => f;
 
 describe('withAnalyticOnMount', () => {
     const writer = jest.fn();

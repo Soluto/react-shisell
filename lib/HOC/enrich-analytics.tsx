@@ -2,15 +2,15 @@ import * as React from 'react';
 import * as shisell from 'shisell';
 import {Requireable} from 'prop-types';
 
-import {TransformAnalyticsFunc} from './types';
 import analyticsContextTypes, {AnalyticsContext} from './analytics-context-types';
 import {withAnalytics} from './with-analytics';
 import {withoutAnalytics} from './without-analytics';
 import Analytics from '../analytics';
 
-export type DispatcherFactory = () => shisell.AnalyticsDispatcher;
+type TransformAnalyticsFunc = (dispatcher: shisell.AnalyticsDispatcher, otherProps: any) => shisell.AnalyticsDispatcher;
+type DispatcherFactory = () => shisell.AnalyticsDispatcher;
 
-export class LazyAnalytics {
+class LazyAnalytics {
     constructor(private dispatcherFactory: DispatcherFactory) {}
 
     get dispatcher() {
@@ -31,9 +31,10 @@ export const enrichAnalytics = (transformAnalyticsFunc: TransformAnalyticsFunc) 
 
         getChildContext() {
             const analytics = this.context.analytics || defaultLazyAnalytics;
+            const newAnalytics = new LazyAnalytics(() => transformAnalyticsFunc(analytics.dispatcher, this.props));
 
             return {
-                analytics: new LazyAnalytics(() => transformAnalyticsFunc(analytics.dispatcher, this.props)),
+                analytics: newAnalytics as any,
             };
         }
 

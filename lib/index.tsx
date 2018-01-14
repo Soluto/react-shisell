@@ -1,6 +1,4 @@
 import { AnalyticsDispatcher } from 'shisell';
-import { propsWithAnalytics } from './HOC/types'
-import * as Types from './HOC/types';
 import * as PropTypes from 'prop-types';
 
 import { ComponentEnhancer, InferableComponentEnhancerWithProps } from 'recompose'
