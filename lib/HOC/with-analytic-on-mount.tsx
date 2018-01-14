@@ -2,7 +2,7 @@ import * as React from 'react';
 import {Requireable} from 'prop-types';
 
 import {TransformPropsFunc} from './types';
-import analyticsContextTypes, {AnalyticsContext} from './analytics-context-types';
+import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
 
 const defaultPropsToExtrasMapper = () => ({});
 
