@@ -18,7 +18,7 @@ class AnalyticsSender extends React.Component {
     }
 }
 
-const identity = <T extends {}>(f: T) => f;
+const identity = <T extends object>(f: T) => f;
 
 describe('enrichAnalytics', () => {
     let writer = jest.fn();

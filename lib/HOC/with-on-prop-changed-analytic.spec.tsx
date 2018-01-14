@@ -14,7 +14,7 @@ interface Props {
     prop1: number;
 }
 const Empty = (props: Props) => null;
-const identity = <T extends {}>(f: T) => f;
+const identity = <T extends any>(f: T) => f;
 const trueProvider = () => true;
 const falseProvider = () => false;
 

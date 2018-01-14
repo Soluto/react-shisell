@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {Requireable} from 'prop-types';
 
-import {TransformPropsFunc, predicate, propsWithAnalytics} from './types';
+import {TransformPropsFunc} from './types';
 import analyticsContextTypes, {AnalyticsContext} from './analytics-context-types';
 
 const defaultPropsToExtrasMapper = () => ({});
@@ -9,7 +9,7 @@ const defaultPropsToExtrasMapper = () => ({});
 export const withAnalyticOnMount = (
     analyticName: string,
     mapPropsToExtras: TransformPropsFunc = defaultPropsToExtrasMapper
-) => <P extends {}>(InnerComponent: React.ComponentType<P>) =>
+) => <P extends object>(InnerComponent: React.ComponentType<P>) =>
     class WithAnalyticOnMount extends React.Component<P> {
         context: AnalyticsContext;
 
