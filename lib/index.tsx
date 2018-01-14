@@ -12,7 +12,6 @@ export {enrichAnalytics} from './HOC/enrich-analytics';
 export * from './HOC/with-analytic-on-event';
 export * from './HOC/with-analytic-on-mount';
 export * from './HOC/with-on-prop-changed-analytic';
-export * from './HOC/with-time-on-page-analytic';
 
 import Analytics from './analytics';
 
