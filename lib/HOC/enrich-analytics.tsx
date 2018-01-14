@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as shisell from 'shisell';
 import {Requireable} from 'prop-types';
 
-import analyticsContextTypes, {AnalyticsContext} from './analytics-context-types';
+import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
 import {withAnalytics} from './with-analytics';
 import {withoutAnalytics} from './without-analytics';
 import Analytics from '../analytics';

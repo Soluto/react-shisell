@@ -5,7 +5,7 @@ import * as shisell from 'shisell';
 
 import {enrichAnalytics} from './enrich-analytics';
 import Analytics from '../analytics';
-import analyticsContextTypes, {AnalyticsContext} from './analytics-context-types';
+import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
 
 import {runImmediate} from '../testUtils';
 
