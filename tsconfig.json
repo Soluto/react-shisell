@@ -12,6 +12,10 @@
             "es2015"
         ]
     },
+    "include": [
+        "src/**/*",
+        "types/*"
+    ],
     "exclude": [
         "**/*.spec.tsx",
         "dist",
