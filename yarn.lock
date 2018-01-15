@@ -2429,9 +2429,9 @@ shellwords@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/shellwords/-/shellwords-0.1.1.tgz#d6b9181c1a48d397324c84871efbcfc73fc0654b"
 
-shisell@^0.3.2:
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/shisell/-/shisell-0.3.2.tgz#91de9b407bf29e02d93e470fbf2f664fbdf67a11"
+shisell@^0.3.4:
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/shisell/-/shisell-0.3.4.tgz#2a8fb29f0d28559a82b349ef77dc9288d48927cf"
 
 signal-exit@^3.0.0, signal-exit@^3.0.2:
   version "3.0.2"
