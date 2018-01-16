@@ -15,7 +15,6 @@ interface Props {
 }
 const Empty = (props: Props) => null;
 const identity = <T extends any>(f: T) => f;
-const trueProvider = () => true;
 const falseProvider = () => false;
 
 describe('withOnPropChangedAnalytic', () => {
@@ -32,7 +31,7 @@ describe('withOnPropChangedAnalytic', () => {
     it('Sends an analytic when the selected prop changes', async () => {
         const EnhancedComponent = compose<Props, Props>(
             enrichAnalytics(identity),
-            withOnPropChangedAnalytic('prop1', trueProvider, 'TestAnalytic')
+            withOnPropChangedAnalytic('prop1', 'TestAnalytic')
         )(Empty);
 
         const result = renderer.create(<EnhancedComponent prop1={1} />);
@@ -50,7 +49,7 @@ describe('withOnPropChangedAnalytic', () => {
     it("Don't send an analytic when the selected prop does not change value", async () => {
         const EnhancedComponent = compose<Props, Props>(
             enrichAnalytics(identity),
-            withOnPropChangedAnalytic('prop1', trueProvider, 'TestAnalytic')
+            withOnPropChangedAnalytic('prop1', 'TestAnalytic')
         )(Empty);
 
         const result = renderer.create(<EnhancedComponent prop1={1} />);
@@ -65,7 +64,7 @@ describe('withOnPropChangedAnalytic', () => {
     it('Respects change predicate returning false when deciding if to send analytics', async () => {
         const EnhancedComponent = compose<Props, Props>(
             enrichAnalytics(identity),
-            withOnPropChangedAnalytic('prop1', falseProvider, 'TestAnalytic')
+            withOnPropChangedAnalytic('prop1', 'TestAnalytic', falseProvider)
         )(Empty);
 
         const result = renderer.create(<EnhancedComponent prop1={1} />);

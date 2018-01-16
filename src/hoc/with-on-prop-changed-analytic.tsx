@@ -7,11 +7,12 @@ type Predicate2 = (val1: any, val2: any) => boolean;
 type TransformPropsFunc = (props: object) => object;
 
 const defaultMapPropsToExtras = () => ({});
+const defaultValueFilter = () => true;
 
 export const withOnPropChangedAnalytic = (
     propName: string,
-    valueFilter: Predicate2,
     analyticName: string,
+    valueFilter: Predicate2 = defaultValueFilter,
     mapPropsToExtras: TransformPropsFunc = defaultMapPropsToExtras
 ) => <Props extends {[_: string]: any}>(BaseComponent: React.ComponentType<Props>) =>
     class WithOnPropChangedAnalytic extends React.Component<Props> {
