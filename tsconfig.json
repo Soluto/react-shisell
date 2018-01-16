@@ -4,7 +4,7 @@
         "skipLibCheck": true,
         "module": "commonjs",
         "declaration": true,
-        "outDir": "./dist",
+        "declarationDir": "types",
         "strict": true,
         "rootDir": "src",
         "jsx" : "react",
@@ -12,10 +12,6 @@
             "es2015"
         ]
     },
-    "include": [
-        "src/**/*",
-        "types/*"
-    ],
     "exclude": [
         "**/*.spec.tsx",
         "dist",
