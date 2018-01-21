@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as shisell from 'shisell';
+import {wrapDisplayName} from 'recompose';
 import {Requireable} from 'prop-types';
 
 import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
@@ -28,6 +29,7 @@ export const enrichAnalytics = (transformAnalyticsFunc: TransformAnalyticsFunc) 
 
         static contextTypes = analyticsContextTypes;
         static childContextTypes = analyticsContextTypes;
+        static displayName = wrapDisplayName(BaseComponent, EnrichAnalytics.name);
 
         getChildContext() {
             const analytics = this.context.analytics || defaultLazyAnalytics;

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {wrapDisplayName} from 'recompose';
 import {Requireable} from 'prop-types';
 
 import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
@@ -19,6 +20,7 @@ export const withOnPropChangedAnalytic = (
         context: AnalyticsContext;
 
         static contextTypes = analyticsContextTypes;
+        static displayName = wrapDisplayName(BaseComponent, WithOnPropChangedAnalytic.name);
 
         componentWillReceiveProps(nextProps: Props) {
             const prevProps = this.props;

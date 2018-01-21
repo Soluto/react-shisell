@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as PropTypes from 'prop-types';
+import {wrapDisplayName} from 'recompose';
 
 import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
 
@@ -47,6 +48,7 @@ export const withAnalyticOnEvent =
         static defaultProps = withAnalyticOnEventDefaultProps;
         static propTypes = withAnalyticOnEventPropTypes;
         static contextTypes = analyticsContextTypes;
+        static displayName = wrapDisplayName(BaseComponent, WithAnalyticOnEvent.name);
 
         constructor(props: CombinedProps) {
             super(props);
