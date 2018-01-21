@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as shisell from 'shisell';
+import {AnalyticsDispatcher} from 'shisell';
 import {wrapDisplayName} from 'recompose';
 import {Requireable} from 'prop-types';
 
@@ -8,8 +8,8 @@ import {withAnalytics} from './with-analytics';
 import {withoutAnalytics} from './without-analytics';
 import Analytics from '../analytics';
 
-type TransformAnalyticsFunc<T> = (dispatcher: shisell.AnalyticsDispatcher, props: T) => shisell.AnalyticsDispatcher;
-type DispatcherFactory = () => shisell.AnalyticsDispatcher;
+type TransformAnalyticsFunc<T> = (dispatcher: AnalyticsDispatcher, props: T) => AnalyticsDispatcher;
+type DispatcherFactory = () => AnalyticsDispatcher;
 
 class LazyAnalytics {
     constructor(private dispatcherFactory: DispatcherFactory) {}

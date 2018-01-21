@@ -1,7 +1,5 @@
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
-import * as PropTypes from 'prop-types';
-import * as shisell from 'shisell';
 
 import {enrichAnalytics} from './enrich-analytics';
 import Analytics from '../analytics';
@@ -33,7 +31,7 @@ describe('enrichAnalytics', () => {
         const result = renderer.create(<EnhancedComponent />);
 
         await runImmediate();
-        
+
         expect(writer).toHaveBeenCalledTimes(1);
         expect(writer.mock.calls[0][0]).toMatchObject({
             Name: 'TestAnalytic',

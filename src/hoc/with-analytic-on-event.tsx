@@ -4,7 +4,9 @@ import {wrapDisplayName} from 'recompose';
 
 import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
 
-export interface ExtraAnalyticsData {[key: string]: any};
+export interface ExtraAnalyticsData {
+    [key: string]: any;
+}
 export interface ExtraAnalyticsDataProvider<Event> {
     (event: Event): ExtraAnalyticsData;
 }
@@ -13,35 +15,33 @@ export type Predicate<T> = (val: T) => boolean;
 export interface WithAnalyticOnEventConfiguration {
     eventName: string;
     analyticName: string;
-};
+}
 export interface WithAnalyticOnEventProps<Event> {
-    analyticsExtras: DataMapper<Event>,
-    analyticsIdentities: DataMapper<Event>,
-    shouldDispatch: boolean | Predicate<Event>
+    analyticsExtras: DataMapper<Event>;
+    analyticsIdentities: DataMapper<Event>;
+    shouldDispatch: boolean | Predicate<Event>;
 }
 
-const dataMapperPropType = PropTypes.oneOfType([
-    PropTypes.object.isRequired,
-    PropTypes.func.isRequired
-]);
+const dataMapperPropType = PropTypes.oneOfType([PropTypes.object.isRequired, PropTypes.func.isRequired]);
 
 const withAnalyticOnEventDefaultProps = {
-    shouldDispatch: true
-}
+    shouldDispatch: true,
+};
 const withAnalyticOnEventPropTypes = {
     analyticsExtras: dataMapperPropType,
     analyticsIdentities: dataMapperPropType,
-    shouldDispatch: PropTypes.oneOfType([
-        PropTypes.bool,
-        PropTypes.func,
-    ])
-}
+    shouldDispatch: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
+};
 
-const getPossibleFunctionValue = <Event, FuncOrValue>(e: Event, f: FuncOrValue) => typeof f === 'function' ? f(e) : f;
+const getPossibleFunctionValue = <Event, FuncOrValue>(e: Event, f: FuncOrValue) => (typeof f === 'function' ? f(e) : f);
 
-export const withAnalyticOnEvent =
-    ({eventName, analyticName}: WithAnalyticOnEventConfiguration) =>
-    <Props extends {[_: string]: any}, Event extends object, CombinedProps extends Props & WithAnalyticOnEventProps<Event>>(BaseComponent: React.ComponentType<Props>) =>
+export const withAnalyticOnEvent = ({eventName, analyticName}: WithAnalyticOnEventConfiguration) => <
+    Props extends {[_: string]: any},
+    Event extends object,
+    CombinedProps extends Props & WithAnalyticOnEventProps<Event>
+>(
+    BaseComponent: React.ComponentType<Props>
+) =>
     class WithAnalyticOnEvent extends React.Component<CombinedProps> {
         context: AnalyticsContext;
 
@@ -58,7 +58,10 @@ export const withAnalyticOnEvent =
 
         onEvent(e: Event) {
             const {shouldDispatch, analyticsExtras, analyticsIdentities} = this.props;
-            const realShouldDispatch: boolean = getPossibleFunctionValue<Event, typeof shouldDispatch>(e, shouldDispatch);
+            const realShouldDispatch: boolean = getPossibleFunctionValue<Event, typeof shouldDispatch>(
+                e,
+                shouldDispatch
+            );
 
             if (realShouldDispatch) {
                 const realAnalyticsExtras: ExtraAnalyticsData = getPossibleFunctionValue(e, analyticsExtras);
@@ -76,7 +79,7 @@ export const withAnalyticOnEvent =
         }
 
         render() {
-            const newProps: CombinedProps = {...this.props as any, [eventName]: this.onEvent};
+            const newProps: CombinedProps = {...(this.props as any), [eventName]: this.onEvent};
             delete newProps.shouldDispatch;
             delete newProps.analyticsExtras;
             delete newProps.analyticsIdentities;

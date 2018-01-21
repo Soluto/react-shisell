@@ -1,7 +1,5 @@
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
-import * as PropTypes from 'prop-types';
-import * as shisell from 'shisell';
 import {compose} from 'recompose';
 
 import {withAnalyticOnEvent} from './with-analytic-on-event';
@@ -14,13 +12,13 @@ const identity = <T extends any>(f: T) => f;
 
 describe('withAnalyticOnEvent', () => {
     const writer = jest.fn();
-    const BaseComponent = jest.fn().mockImplementation((props) => {
+    const BaseComponent = jest.fn().mockImplementation(props => {
         props.onClick({
-            source: 'MyBaseComponent', 
-            user: 'McCree'
+            source: 'MyBaseComponent',
+            user: 'McCree',
         });
         return null;
-    })
+    });
 
     beforeAll(() => Analytics.setWriter(writer));
     beforeEach(() => writer.mockReset());
@@ -77,9 +75,9 @@ describe('withAnalyticOnEvent', () => {
         });
         expect(eventHandler).toHaveBeenCalledTimes(1);
         expect(eventHandler.mock.calls[0][0]).toEqual({
-            source: 'MyBaseComponent', 
-            user: 'McCree'
-        })
+            source: 'MyBaseComponent',
+            user: 'McCree',
+        });
     });
 
     it('Analytic sent with extra data from analyticsExtras as an object', async () => {
@@ -98,8 +96,8 @@ describe('withAnalyticOnEvent', () => {
         expect(writer.mock.calls[0][0]).toMatchObject({
             Name: 'TestAnalytic',
             ExtraData: {
-                Name: 'Me'
-            }
+                Name: 'Me',
+            },
         });
     });
 
@@ -112,15 +110,15 @@ describe('withAnalyticOnEvent', () => {
             })
         )(BaseComponent);
 
-        const result = renderer.create(<EnhancedComponent analyticsExtras={(e) => ({Source: e.source})} />);
+        const result = renderer.create(<EnhancedComponent analyticsExtras={e => ({Source: e.source})} />);
 
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
         expect(writer.mock.calls[0][0]).toMatchObject({
             Name: 'TestAnalytic',
             ExtraData: {
-                Source: 'MyBaseComponent'
-            }
+                Source: 'MyBaseComponent',
+            },
         });
     });
 
@@ -140,8 +138,8 @@ describe('withAnalyticOnEvent', () => {
         expect(writer.mock.calls[0][0]).toMatchObject({
             Name: 'TestAnalytic',
             Identities: {
-                User: 'Me'
-            }
+                User: 'Me',
+            },
         });
     });
 
@@ -154,15 +152,15 @@ describe('withAnalyticOnEvent', () => {
             })
         )(BaseComponent);
 
-        const result = renderer.create(<EnhancedComponent analyticsIdentities={(e) => ({User: e.user})} />);
+        const result = renderer.create(<EnhancedComponent analyticsIdentities={e => ({User: e.user})} />);
 
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
         expect(writer.mock.calls[0][0]).toMatchObject({
             Name: 'TestAnalytic',
             Identities: {
-                User: 'McCree'
-            }
+                User: 'McCree',
+            },
         });
     });
 });

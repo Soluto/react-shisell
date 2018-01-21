@@ -1,7 +1,5 @@
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
-import * as PropTypes from 'prop-types';
-import * as shisell from 'shisell';
 import {compose} from 'recompose';
 
 import {withAnalyticOnMount} from './with-analytic-on-mount';
@@ -21,10 +19,7 @@ describe('withAnalyticOnMount', () => {
     });
 
     it('Actually sends the analytic on mount', async () => {
-        const EnhancedComponent = compose(
-            enrichAnalytics(identity),
-            withAnalyticOnMount('TestAnalytic')
-        )(Empty);
+        const EnhancedComponent = compose(enrichAnalytics(identity), withAnalyticOnMount('TestAnalytic'))(Empty);
 
         const result = renderer.create(<EnhancedComponent />);
 

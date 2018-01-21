@@ -1,2 +1,4 @@
 lib/
 __tests__
+.lintstagedrc.json
+.prettierrc.json

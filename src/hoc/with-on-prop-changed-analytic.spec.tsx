@@ -1,7 +1,5 @@
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
-import * as PropTypes from 'prop-types';
-import * as shisell from 'shisell';
 import {compose} from 'recompose';
 
 import {withOnPropChangedAnalytic} from './with-on-prop-changed-analytic';
