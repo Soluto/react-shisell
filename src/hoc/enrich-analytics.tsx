@@ -8,7 +8,7 @@ import {withAnalytics} from './with-analytics';
 import {withoutAnalytics} from './without-analytics';
 import Analytics from '../analytics';
 
-type TransformAnalyticsFunc = (dispatcher: shisell.AnalyticsDispatcher, otherProps: any) => shisell.AnalyticsDispatcher;
+type TransformAnalyticsFunc<T> = (dispatcher: shisell.AnalyticsDispatcher, props: T) => shisell.AnalyticsDispatcher;
 type DispatcherFactory = () => shisell.AnalyticsDispatcher;
 
 class LazyAnalytics {
@@ -21,10 +21,10 @@ class LazyAnalytics {
 
 const defaultLazyAnalytics = new LazyAnalytics(() => Analytics.dispatcher);
 
-export const enrichAnalytics = (transformAnalyticsFunc: TransformAnalyticsFunc) => <P extends object>(
-    BaseComponent: React.ComponentType<P>
+export const enrichAnalytics = <Props extends object>(transformAnalyticsFunc: TransformAnalyticsFunc<Props>) => (
+    BaseComponent: React.ComponentType<Props>
 ) =>
-    class EnrichAnalytics extends React.Component<P> {
+    class EnrichAnalytics extends React.Component<Props> {
         context: AnalyticsContext;
 
         static contextTypes = analyticsContextTypes;

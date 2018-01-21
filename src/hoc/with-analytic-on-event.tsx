@@ -41,7 +41,7 @@ const getPossibleFunctionValue = <Event, FuncOrValue>(e: Event, f: FuncOrValue) 
 
 export const withAnalyticOnEvent =
     ({eventName, analyticName}: WithAnalyticOnEventConfiguration) =>
-    <Props extends object, Event extends object, CombinedProps extends Props & WithAnalyticOnEventProps<Event>>(BaseComponent: React.ComponentType<Props>) =>
+    <Props extends {[_: string]: any}, Event extends object, CombinedProps extends Props & WithAnalyticOnEventProps<Event>>(BaseComponent: React.ComponentType<Props>) =>
     class WithAnalyticOnEvent extends React.Component<CombinedProps> {
         context: AnalyticsContext;
 
@@ -70,8 +70,8 @@ export const withAnalyticOnEvent =
                     .dispatch(analyticName);
             }
 
-            if ((this.props as any)[eventName]) {
-                (this.props as any)[eventName](e);
+            if (this.props[eventName]) {
+                this.props[eventName](e);
             }
         }
 

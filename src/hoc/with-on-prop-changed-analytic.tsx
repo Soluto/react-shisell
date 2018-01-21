@@ -4,25 +4,25 @@ import {Requireable} from 'prop-types';
 
 import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
 
-type Predicate2 = (val1: any, val2: any) => boolean;
-type TransformPropsFunc = (props: object) => object;
+type Predicate2<T1, T2> = (val1: T1, val2: T2) => boolean;
+type TransformPropsFunc<In extends object, Out extends object> = (props: In) => Out;
 
 const defaultMapPropsToExtras = () => ({});
 const defaultValueFilter = () => true;
 
-export const withOnPropChangedAnalytic = (
-    propName: string,
+export const withOnPropChangedAnalytic = <TProps extends {[_: string]: any}, TProp extends keyof TProps>(
+    propName: TProp,
     analyticName: string,
-    valueFilter: Predicate2 = defaultValueFilter,
-    mapPropsToExtras: TransformPropsFunc = defaultMapPropsToExtras
-) => <Props extends {[_: string]: any}>(BaseComponent: React.ComponentType<Props>) =>
-    class WithOnPropChangedAnalytic extends React.Component<Props> {
+    valueFilter: Predicate2<TProp, TProp> = defaultValueFilter,
+    mapPropsToExtras: TransformPropsFunc<TProps, object> = defaultMapPropsToExtras
+) => (BaseComponent: React.ComponentType<TProps>) =>
+    class WithOnPropChangedAnalytic extends React.Component<TProps> {
         context: AnalyticsContext;
 
         static contextTypes = analyticsContextTypes;
         static displayName = wrapDisplayName(BaseComponent, WithOnPropChangedAnalytic.name);
 
-        componentWillReceiveProps(nextProps: Props) {
+        componentWillReceiveProps(nextProps: TProps) {
             const prevProps = this.props;
 
             const prevValue = prevProps[propName];
