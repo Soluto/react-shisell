@@ -1,56 +1,70 @@
 import * as React from 'react';
-import {Requireable} from 'prop-types';
+import * as PropTypes from 'prop-types';
 
 import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
 
-const emptyObjectProvider = () => ({});
-const trueProvider = () => true;
-
-type ExtraAnalyticsData = {[key: string]: any};
-type ExtraAnalyticsDataProvider<Props, Event> = (props: Props, event: Event) => ExtraAnalyticsData;
-type DataMapper<Props, Event> = ExtraAnalyticsData | ExtraAnalyticsDataProvider<Props, Event>;
-type Predicate2<T1, T2> = (val1: T1, val2: T2) => boolean;
-type EventHocConfiguration<Props, Event> = {
+export interface ExtraAnalyticsData {[key: string]: any};
+export interface ExtraAnalyticsDataProvider<Event> {
+    (event: Event): ExtraAnalyticsData;
+}
+export type DataMapper<Event> = ExtraAnalyticsData | ExtraAnalyticsDataProvider<Event>;
+export type Predicate<T> = (val: T) => boolean;
+export interface WithAnalyticOnEventConfiguration {
     eventName: string;
     analyticName: string;
-    mapPropsToExtras: DataMapper<Props, Event>;
-    mapPropsToIdentities: DataMapper<Props, Event>;
-    shouldDispatch: Predicate2<Props, Event>;
 };
+export interface WithAnalyticOnEventProps<Event> {
+    analyticsExtras: DataMapper<Event>,
+    analyticsIdentities: DataMapper<Event>,
+    shouldDispatch: boolean | Predicate<Event>
+}
 
-export const withAnalyticOnEvent = <Props extends object, Event extends object>({
-    eventName,
-    analyticName,
-    mapPropsToExtras = emptyObjectProvider,
-    mapPropsToIdentities = emptyObjectProvider,
-    shouldDispatch = trueProvider,
-}: EventHocConfiguration<Props, Event>) => (BaseComponent: React.ComponentType<Props>) =>
-    class WithAnalyticOnEvent extends React.Component<Props> {
+const dataMapperPropType = PropTypes.oneOfType([
+    PropTypes.object.isRequired,
+    PropTypes.func.isRequired
+]);
+
+const withAnalyticOnEventDefaultProps = {
+    shouldDispatch: true
+}
+const withAnalyticOnEventPropTypes = {
+    analyticsExtras: dataMapperPropType,
+    analyticsIdentities: dataMapperPropType,
+    shouldDispatch: PropTypes.oneOfType([
+        PropTypes.bool,
+        PropTypes.func,
+    ])
+}
+
+const getPossibleFunctionValue = <Event, FuncOrValue>(e: Event, f: FuncOrValue) => typeof f === 'function' ? f(e) : f;
+
+export const withAnalyticOnEvent =
+    ({eventName, analyticName}: WithAnalyticOnEventConfiguration) =>
+    <Props extends object, Event extends object, CombinedProps extends Props & WithAnalyticOnEventProps<Event>>(BaseComponent: React.ComponentType<Props>) =>
+    class WithAnalyticOnEvent extends React.Component<CombinedProps> {
         context: AnalyticsContext;
 
+        static defaultProps = withAnalyticOnEventDefaultProps;
+        static propTypes = withAnalyticOnEventPropTypes;
         static contextTypes = analyticsContextTypes;
 
-        constructor(props: Props) {
+        constructor(props: CombinedProps) {
             super(props);
 
             this.onEvent = this.onEvent.bind(this);
         }
 
         onEvent(e: Event) {
-            if (shouldDispatch(this.props, e)) {
-                const extraData =
-                    typeof mapPropsToExtras === 'function' 
-                    ? mapPropsToExtras(this.props, e) 
-                    : mapPropsToExtras;
+            const {shouldDispatch, analyticsExtras, analyticsIdentities} = this.props;
+            const realShouldDispatch: boolean = getPossibleFunctionValue<Event, typeof shouldDispatch>(e, shouldDispatch);
 
-                const identities =
-                    typeof mapPropsToIdentities === 'function'
-                        ? mapPropsToIdentities(this.props, e)
-                        : mapPropsToIdentities;
+            if (realShouldDispatch) {
+                const realAnalyticsExtras: ExtraAnalyticsData = getPossibleFunctionValue(e, analyticsExtras);
+                const realAnalyticsIdentities: ExtraAnalyticsData = getPossibleFunctionValue(e, analyticsIdentities);
 
                 this.context.analytics.dispatcher
-                    .withExtras(extraData)
-                    .withIdentities(identities)
+                    .withExtras(realAnalyticsExtras)
+                    .withIdentities(realAnalyticsIdentities)
                     .dispatch(analyticName);
             }
 
@@ -60,8 +74,11 @@ export const withAnalyticOnEvent = <Props extends object, Event extends object>(
         }
 
         render() {
-            const newProps = Object.assign({}, this.props, {[eventName]: this.onEvent});
+            const newProps: CombinedProps = {...this.props as any, [eventName]: this.onEvent};
+            delete newProps.shouldDispatch;
+            delete newProps.analyticsExtras;
+            delete newProps.analyticsIdentities;
 
-            return <BaseComponent {...newProps} />;
+            return <BaseComponent {...newProps as Props} />;
         }
     };

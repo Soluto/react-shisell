@@ -15,7 +15,10 @@ const identity = <T extends any>(f: T) => f;
 describe('withAnalyticOnEvent', () => {
     const writer = jest.fn();
     const BaseComponent = jest.fn().mockImplementation((props) => {
-        props.onClick();
+        props.onClick({
+            source: 'MyBaseComponent', 
+            user: 'McCree'
+        });
         return null;
     })
 
@@ -46,27 +49,49 @@ describe('withAnalyticOnEvent', () => {
             withAnalyticOnEvent({
                 eventName: 'onClick',
                 analyticName: 'TestAnalytic',
-                shouldDispatch: () => false
             })
         )(BaseComponent);
 
-        const result = renderer.create(<EnhancedComponent />);
+        const result = renderer.create(<EnhancedComponent shouldDispatch={false} />);
 
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(0);
     });
 
-    it('Analytic sent with extra data from mapPropsToExtras as an object', async () => {
+    it('Sends analytic when triggered and calls inner event handler', async () => {
+        const eventHandler = jest.fn();
         const EnhancedComponent = compose(
             enrichAnalytics(identity),
             withAnalyticOnEvent({
                 eventName: 'onClick',
                 analyticName: 'TestAnalytic',
-                mapPropsToExtras: {Name: 'Me'}
             })
         )(BaseComponent);
 
-        const result = renderer.create(<EnhancedComponent />);
+        const result = renderer.create(<EnhancedComponent onClick={eventHandler} />);
+
+        await runImmediate();
+        expect(writer).toHaveBeenCalledTimes(1);
+        expect(writer.mock.calls[0][0]).toMatchObject({
+            Name: 'TestAnalytic',
+        });
+        expect(eventHandler).toHaveBeenCalledTimes(1);
+        expect(eventHandler.mock.calls[0][0]).toEqual({
+            source: 'MyBaseComponent', 
+            user: 'McCree'
+        })
+    });
+
+    it('Analytic sent with extra data from analyticsExtras as an object', async () => {
+        const EnhancedComponent = compose(
+            enrichAnalytics(identity),
+            withAnalyticOnEvent({
+                eventName: 'onClick',
+                analyticName: 'TestAnalytic',
+            })
+        )(BaseComponent);
+
+        const result = renderer.create(<EnhancedComponent analyticsExtras={{Name: 'Me'}} />);
 
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
@@ -78,39 +103,37 @@ describe('withAnalyticOnEvent', () => {
         });
     });
 
-    it('Analytic sent with extra data from mapPropsToExtras as a function', async () => {
+    it('Analytic sent with extra data from analyticsExtras as a function with data from event', async () => {
         const EnhancedComponent = compose(
             enrichAnalytics(identity),
             withAnalyticOnEvent({
                 eventName: 'onClick',
                 analyticName: 'TestAnalytic',
-                mapPropsToExtras: (props) => ({Something: props.something})
             })
         )(BaseComponent);
 
-        const result = renderer.create(<EnhancedComponent something={123} />);
+        const result = renderer.create(<EnhancedComponent analyticsExtras={(e) => ({Source: e.source})} />);
 
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
         expect(writer.mock.calls[0][0]).toMatchObject({
             Name: 'TestAnalytic',
             ExtraData: {
-                Something: 123
+                Source: 'MyBaseComponent'
             }
         });
     });
 
-    it('Analytic sent with identities from mapPropsToIdentities as an object', async () => {
+    it('Analytic sent with identities from analyticsIdentities as an object', async () => {
         const EnhancedComponent = compose(
             enrichAnalytics(identity),
             withAnalyticOnEvent({
                 eventName: 'onClick',
                 analyticName: 'TestAnalytic',
-                mapPropsToIdentities: ({User: 'Me'})
             })
         )(BaseComponent);
 
-        const result = renderer.create(<EnhancedComponent />);
+        const result = renderer.create(<EnhancedComponent analyticsIdentities={{User: 'Me'}} />);
 
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
@@ -122,17 +145,16 @@ describe('withAnalyticOnEvent', () => {
         });
     });
 
-    it('Analytic sent with identities from mapPropsToIdentities as a function', async () => {
+    it('Analytic sent with identities from analyticsIdentities as a function with data from event', async () => {
         const EnhancedComponent = compose(
             enrichAnalytics(identity),
             withAnalyticOnEvent({
                 eventName: 'onClick',
                 analyticName: 'TestAnalytic',
-                mapPropsToIdentities: (props) => ({User: props.userName})
             })
         )(BaseComponent);
 
-        const result = renderer.create(<EnhancedComponent userName="McCree" />);
+        const result = renderer.create(<EnhancedComponent analyticsIdentities={(e) => ({User: e.user})} />);
 
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
