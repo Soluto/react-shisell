@@ -1,4 +1,11 @@
-lib/
-__tests__
 .lintstagedrc.json
 .prettierrc.json
+src/
+.vscode/
+.gitignore
+.npmignore
+.npmrc
+rollup.config.js
+yarn.lock
+tsconfig.json
+.rpt2_cache
