@@ -5,6 +5,11 @@
   "main": "dist/react-shisell.cjs.js",
   "module": "dist/react-shisell.es.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "package.json",
+    "LICENSE"
+  ],
   "repository": "https://github.com/Soluto/react-shisell",
   "author": "Soluto",
   "license": "MIT",
