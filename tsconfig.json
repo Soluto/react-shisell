@@ -6,12 +6,18 @@
         "declaration": true,
         "outDir": "./dist",
         "strict": true,
-        "rootDir": "lib",
-        "jsx" : "react"
+        "rootDir": "src",
+        "jsx" : "react",
+        "lib": [
+            "es2015"
+        ]
     },
+    "include": [
+        "src/**/*",
+        "types/*"
+    ],
     "exclude": [
-        "./__tests__",
-        "./lib/__mocks__",
+        "**/*.spec.tsx",
         "dist",
         "node_modules"
     ]
