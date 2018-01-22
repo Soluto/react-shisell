@@ -10,7 +10,7 @@ Its most basic design principle is that at the root of the react tree is the wri
   + [`withAnalytics`](#withanalytics)
   + [`withoutAnalytics`](#withoutanalytics)
   + [`enrichAnalytics`](#enrichanalytics)
-  + [`withAnalyticOnMount`](#withanalyticonmount)
+  + [`withAnalyticOnView`](#withanalyticonview)
   + [`withAnalyticOnEvent`](#withanalyticonevent)
   + [`withOnPropChangedAnalytic`](#withonpropchangedanalytic)
 * Others
@@ -76,17 +76,19 @@ const EnhancedLoginPage = compose(
 ReactDOM.render(<EnhancedLoginPage />);
 ```
 
-### `withAnalyticOnMount`
+### `withAnalyticOnView`
 
 ```js
-withAnalyticOnMount(
+withAnalyticOnView({
     analyticName: string,
+    predicate?: (props: object) => boolean
     mapPropsToExtras?: (props: object) => object,
-): HigherOrderComponent;
+}): HigherOrderComponent;
 ```
 
-`withAnalyticOnMount` is used for the very common case of wanting to dispatch an analytic whenever a component mounts.
+`withAnalyticOnView` is used for the very common case of wanting to dispatch an analytic whenever a component mounts.
 For example, dispatching an analytic whenever someone enters a specific page, or views a modal, etc.
+It's also possible to supply a `predicate` to only dispatch the analytic after a certain prop has a value (for example, data loaded from an async fetch).
 
 Example usage:
 
@@ -94,12 +96,12 @@ Example usage:
 const LoginPage = (props) => ...;
 
 // The sent analytic will be LoginPage_Rendered as opposed to Rendered, because the scope was enhanced.
-const EnhancedLoginPage = withAnalyticOnMount(
-  'LoginPage_Entered',
-  (props) => ({
+const EnhancedLoginPage = withAnalyticOnView({
+  analyticName: 'LoginPage_Entered',
+  mapPropsToExtras: (props) => ({
     LoginAttempt: props.loginAttempt
   })
-)(LoginPage);
+})(LoginPage);
 ReactDOM.render(<EnhancedLoginPage />);
 ```
 
@@ -109,16 +111,19 @@ ReactDOM.render(<EnhancedLoginPage />);
 withAnalyticOnEvent({
     eventName: string,
     analyticName: string,
-    mapPropsToExtras?: object | (props, event) => object,
-    mapPropsToIdentities?: object | (props, event) => object,
-    shouldDispatch?: (props, event) => boolean,
+    extras?: object | (event) => object,
+    identities?: object | (event) => object,
 }): HigherOrderComponent;
 ```
 
 `withAnalyticOnEvent` is used when we need an event handler that dispatches analytics.
 For example, a button that triggers some action, and dispatches an analytic.
 The `eventName` is also the name of the prop the event handler will be injected into (if it already exists, it will be wrapped).
-`mapPropsTo{Extras,Identities}` let you add extra data or identities to the sent analytic, and `shouldDispatch` lets you filter analytics.
+There are two ways to add data to the sent analytic:
+1. Statically - with `extras` and `identities` which will let you add extras/identities from the event itself, or just as a static object.
+2. Dynamically with props - the resulting component will accept an `analyticsExtras` and `analyticsIdentities` props which behave the same as their static counterparts.
+    In addition, the component will receive a `shouldDispatch` prop which can be a boolean or an (event) => boolean predicate.
+
 
 Example usage:
 
@@ -129,9 +134,11 @@ const LoginPage = (props) => <button onClick={onButtonClick}>Login here</button>
 const EnhancedLoginPage = withAnalyticOnEvent({
   eventName: 'onButtonClick',
   analyticName: 'LoginButton_Clicked',
-  shouldDispatch: (props, e) => props.retryAttempt === 0, // Only send analytic on the first login attempt
+  identities: {
+    'User': localStorage.userName
+  }
 })(LoginPage);
-ReactDOM.render(<EnhancedLoginPage onButtonClick={(e) => console.log(e)} />);
+ReactDOM.render(<EnhancedLoginPage analyticsExtras={{Source: 'Button'}} onButtonClick={(e) => console.log(e)} shouldDispatch={someBooleanRule && true} />);
 ```
 
 ### `withOnPropChangedAnalytic`
