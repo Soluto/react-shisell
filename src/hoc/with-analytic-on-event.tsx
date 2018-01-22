@@ -65,10 +65,7 @@ export const withAnalyticOnEvent = <
 
         onEvent(e: Event) {
             const {shouldDispatch, analyticsExtras: propExtras, analyticsIdentities: propIdentities} = this.props;
-            const actualShouldDispatch = getPossibleFunctionValue<Event, typeof shouldDispatch>(
-                e,
-                shouldDispatch
-            );
+            const actualShouldDispatch = getPossibleFunctionValue<Event, typeof shouldDispatch>(e, shouldDispatch);
 
             if ((isBoolean(actualShouldDispatch) && actualShouldDispatch) || !isBoolean(actualShouldDispatch)) {
                 const actualPropsExtras: ExtraAnalyticsData = getPossibleFunctionValue(e, propExtras);
