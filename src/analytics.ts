@@ -7,10 +7,12 @@ export default {
     get dispatcher() {
         return analyticsDispatcher;
     },
-    transformDispatcher(dispatcherTransformFunc: (dispatcher: shisell.AnalyticsDispatcher) => shisell.AnalyticsDispatcher) {
+    transformDispatcher(
+        dispatcherTransformFunc: (dispatcher: shisell.AnalyticsDispatcher) => shisell.AnalyticsDispatcher
+    ) {
         analyticsDispatcher = dispatcherTransformFunc(analyticsDispatcher);
     },
     setWriter(func: shisell.EventModelWriter<void>) {
         customWriter = func;
-    }
-}
+    },
+};

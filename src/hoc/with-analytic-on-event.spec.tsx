@@ -171,8 +171,8 @@ describe('withAnalyticOnEvent', () => {
                 eventName: 'onClick',
                 analyticName: 'TestAnalytic',
                 identities: {
-                    User: 'McCree'
-                }
+                    User: 'McCree',
+                },
             })
         )(BaseComponent);
 
@@ -195,8 +195,8 @@ describe('withAnalyticOnEvent', () => {
                 eventName: 'onClick',
                 analyticName: 'TestAnalytic',
                 extras: {
-                    Source: 'Some source'
-                }
+                    Source: 'Some source',
+                },
             })
         )(BaseComponent);
 
@@ -207,8 +207,8 @@ describe('withAnalyticOnEvent', () => {
         expect(writer.mock.calls[0][0]).toMatchObject({
             Name: 'TestAnalytic',
             ExtraData: {
-                Source: 'Some source'
-            }
+                Source: 'Some source',
+            },
         });
     });
 
@@ -219,16 +219,23 @@ describe('withAnalyticOnEvent', () => {
                 eventName: 'onClick',
                 analyticName: 'TestAnalytic',
                 extras: null,
-                identities: undefined
+                identities: undefined,
             })
         )(BaseComponent);
 
-        const result = renderer.create(<EnhancedComponent analyticsExtras={undefined} analyticsIdentities={null} shouldDispatch={true} onClick={0} />);
+        const result = renderer.create(
+            <EnhancedComponent
+                analyticsExtras={undefined}
+                analyticsIdentities={null}
+                shouldDispatch={true}
+                onClick={0}
+            />
+        );
 
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
         expect(writer.mock.calls[0][0]).toMatchObject({
-            Name: 'TestAnalytic'
+            Name: 'TestAnalytic',
         });
     });
 });

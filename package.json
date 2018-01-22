@@ -1,10 +1,15 @@
 {
   "name": "react-shisell",
-  "version": "0.0.5",
+  "version": "1.0.0",
   "description": "React HoC which add analytics to your components using shisell-js",
   "main": "dist/react-shisell.cjs.js",
   "module": "dist/react-shisell.es.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "package.json",
+    "LICENSE"
+  ],
   "repository": "https://github.com/Soluto/react-shisell",
   "author": "Soluto",
   "license": "MIT",
@@ -16,31 +21,30 @@
     "prettify": "prettier --write **/*.ts **/*.tsx"
   },
   "devDependencies": {
-    "@types/jest": "^20.0.8",
+    "@types/jest": "^22.0.1",
     "@types/node": "^9.3.0",
-    "@types/prop-types": "^15.5.1",
-    "@types/react": "^16.0.5",
-    "@types/react-test-renderer": "^15.5.4",
-    "@types/recompose": "^0.24.1",
+    "@types/prop-types": "^15.5.2",
+    "@types/react": "*",
+    "@types/react-test-renderer": "^16.0.0",
+    "@types/recompose": "^0.24.4",
     "husky": "^0.14.3",
-    "jest": "^21.0.1",
+    "jest": "^22.1.4",
     "lint-staged": "^6.0.1",
     "prettier": "^1.10.2",
-    "prop-types": "^15.5.10",
-    "react": "^15.6.1",
-    "react-test-renderer": "^15.6.1",
+    "prop-types": "^15.6.0",
+    "react": "^16.2.0",
+    "react-test-renderer": "^16.2.0",
     "rimraf": "^2.6.2",
-    "rollup": "^0.54.0",
+    "rollup": "^0.54.1",
     "rollup-plugin-commonjs": "^8.2.6",
     "rollup-plugin-node-resolve": "^3.0.2",
     "rollup-plugin-typescript2": "^0.10.0",
-    "rollup-plugin-uglify": "^2.0.1",
-    "ts-jest": "^21.0.0",
-    "typescript": "^2.5.2",
-    "uglify-es": "^3.3.7"
+    "rollup-plugin-uglify": "^3.0.0",
+    "ts-jest": "^22.0.1",
+    "typescript": "^2.6.2"
   },
   "dependencies": {
-    "recompose": "^0.25.0",
+    "recompose": "^0.26.0",
     "shisell": "^0.3.4"
   },
   "peerDependencies": {

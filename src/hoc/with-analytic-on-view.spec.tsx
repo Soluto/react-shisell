@@ -40,7 +40,10 @@ describe('withAnalyticOnMount', () => {
             enrichAnalytics(identity),
             withAnalyticOnView({
                 analyticName: 'TestAnalytic',
-                predicate: jest.fn().mockReturnValueOnce(false).mockReturnValueOnce(true);
+                predicate: jest
+                    .fn()
+                    .mockReturnValueOnce(false)
+                    .mockReturnValueOnce(true),
             })
         )(Empty);
 
