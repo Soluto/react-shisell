@@ -163,4 +163,72 @@ describe('withAnalyticOnEvent', () => {
             },
         });
     });
+
+    it('Analytic sent with static identities', async () => {
+        const EnhancedComponent = compose(
+            enrichAnalytics(identity),
+            withAnalyticOnEvent({
+                eventName: 'onClick',
+                analyticName: 'TestAnalytic',
+                identities: {
+                    User: 'McCree'
+                }
+            })
+        )(BaseComponent);
+
+        const result = renderer.create(<EnhancedComponent />);
+
+        await runImmediate();
+        expect(writer).toHaveBeenCalledTimes(1);
+        expect(writer.mock.calls[0][0]).toMatchObject({
+            Name: 'TestAnalytic',
+            Identities: {
+                User: 'McCree',
+            },
+        });
+    });
+
+    it('Analytic sent with static extras', async () => {
+        const EnhancedComponent = compose(
+            enrichAnalytics(identity),
+            withAnalyticOnEvent({
+                eventName: 'onClick',
+                analyticName: 'TestAnalytic',
+                extras: {
+                    Source: 'Some source'
+                }
+            })
+        )(BaseComponent);
+
+        const result = renderer.create(<EnhancedComponent />);
+
+        await runImmediate();
+        expect(writer).toHaveBeenCalledTimes(1);
+        expect(writer.mock.calls[0][0]).toMatchObject({
+            Name: 'TestAnalytic',
+            ExtraData: {
+                Source: 'Some source'
+            }
+        });
+    });
+
+    it('Correctly ignores nulls in extras/identities', async () => {
+        const EnhancedComponent = compose(
+            enrichAnalytics(identity),
+            withAnalyticOnEvent({
+                eventName: 'onClick',
+                analyticName: 'TestAnalytic',
+                extras: null,
+                identities: undefined
+            })
+        )(BaseComponent);
+
+        const result = renderer.create(<EnhancedComponent analyticsExtras={undefined} analyticsIdentities={null} shouldDispatch={true} onClick={0} />);
+
+        await runImmediate();
+        expect(writer).toHaveBeenCalledTimes(1);
+        expect(writer.mock.calls[0][0]).toMatchObject({
+            Name: 'TestAnalytic'
+        });
+    });
 });
