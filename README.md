@@ -194,3 +194,33 @@ login().then(
 )
 
 ```
+
+### `analyticsContextTypes`
+
+```js
+analyticsContextTypes: {
+  [key: string]: PropType
+}
+```
+
+The `analyticsContextTypes` object is the context prop types used for react-shisell.
+All inner components use it to communicate and access the underlying `dispatcher`.
+You should rarely need to use this directly.
+The `AnalyticsContext` export is the TS interface for the object in context.
+
+Example usage:
+```js
+import {analyticsContextTypes, AnalyticsContext} from 'react-shisell';
+
+class ComplicatedAnalytics extends React.Component {
+  static contextTypes = analyticsContextTypes;
+
+  context: AnalyticsContext;
+
+  componentDidMount() {
+    // Do things with the dispatcher here
+    this.context.analytics.dispatcher......;
+  }
+}
+
+```
