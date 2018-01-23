@@ -48,7 +48,7 @@ export const withAnalyticOnEvent = <
     analyticName,
     extras: staticExtras,
     identities: staticIdentities,
-}: WithAnalyticOnEventConfiguration<Props, Event>) => (BaseComponent: React.ComponentType<Props>) =>
+}: WithAnalyticOnEventConfiguration<Props, Event>) => (BaseComponent: React.ComponentType<Props>) => {
     class WithAnalyticOnEvent extends React.Component<CombinedProps> {
         context: AnalyticsContext;
 
@@ -100,3 +100,20 @@ export const withAnalyticOnEvent = <
             return <BaseComponent {...newProps as Props} />;
         }
     };
+
+    if (process.env.NODE_ENV !== 'production') {
+        WithAnalyticOnEvent.prototype.componentDidMount = WithAnalyticOnEvent.prototype.componentDidUpdate = function() {
+            if (this.props.extras || this.props.identities || this.props.extrasProps) {
+                console.warn(
+                    `Using old API in ${WithAnalyticOnEvent.displayName}. withAnalyticOnEvent does not support extras/identities/extrasProps anymore. Please review the documentation in https://www.npmjs.com/package/react-shisell#withanalyticonevent`
+                );
+
+                // Warn only once
+                delete WithAnalyticOnEvent.prototype.componentDidMount;
+                delete WithAnalyticOnEvent.prototype.componentDidUpdate;
+            }
+        }
+    }
+
+    return WithAnalyticOnEvent;
+};
