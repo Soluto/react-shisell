@@ -21,18 +21,18 @@ export interface WithAnalyticOnEventConfiguration<TProps, TEvent> {
 export interface WithAnalyticOnEventProps<Event> {
     analyticsExtras?: DataMapper<Event>;
     analyticsIdentities?: DataMapper<Event>;
-    shouldDispatch?: boolean | Predicate<Event>;
+    shouldDispatchAnalytics?: boolean | Predicate<Event>;
 }
 
 const dataMapperPropType = PropTypes.oneOfType([PropTypes.object.isRequired, PropTypes.func.isRequired]);
 
 const withAnalyticOnEventDefaultProps = {
-    shouldDispatch: true,
+    shouldDispatchAnalytics: true,
 };
 const withAnalyticOnEventPropTypes = {
     analyticsExtras: dataMapperPropType,
     analyticsIdentities: dataMapperPropType,
-    shouldDispatch: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
+    shouldDispatchAnalytics: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
 };
 
 const getPossibleFunctionValue = <Event, FuncOrValue>(e: Event, f: FuncOrValue) => (typeof f === 'function' ? f(e) : f);
@@ -64,8 +64,8 @@ export const withAnalyticOnEvent = <
         }
 
         onEvent(e: Event) {
-            const {shouldDispatch, analyticsExtras: propExtras, analyticsIdentities: propIdentities} = this.props;
-            const actualShouldDispatch = getPossibleFunctionValue<Event, typeof shouldDispatch>(e, shouldDispatch);
+            const {shouldDispatchAnalytics, analyticsExtras: propExtras, analyticsIdentities: propIdentities} = this.props;
+            const actualShouldDispatch = getPossibleFunctionValue<Event, typeof shouldDispatchAnalytics>(e, shouldDispatchAnalytics);
 
             if ((isBoolean(actualShouldDispatch) && actualShouldDispatch) || !isBoolean(actualShouldDispatch)) {
                 const actualPropsExtras: ExtraAnalyticsData = getPossibleFunctionValue(e, propExtras);
@@ -93,13 +93,13 @@ export const withAnalyticOnEvent = <
 
         render() {
             const newProps: CombinedProps = {...(this.props as any), [eventName]: this.onEvent};
-            delete newProps.shouldDispatch;
+            delete newProps.shouldDispatchAnalytics;
             delete newProps.analyticsExtras;
             delete newProps.analyticsIdentities;
 
             return <BaseComponent {...newProps as Props} />;
         }
-    };
+    }
 
     if (process.env.NODE_ENV !== 'production') {
         WithAnalyticOnEvent.prototype.componentDidMount = WithAnalyticOnEvent.prototype.componentDidUpdate = function() {
