@@ -122,7 +122,7 @@ The `eventName` is also the name of the prop the event handler will be injected 
 There are two ways to add data to the sent analytic:
 1. Statically - with `extras` and `identities` which will let you add extras/identities from the event itself, or just as a static object.
 2. Dynamically with props - the resulting component will accept an `analyticsExtras` and `analyticsIdentities` props which behave the same as their static counterparts.
-    In addition, the component will receive a `shouldDispatch` prop which can be a boolean or an (event) => boolean predicate.
+    In addition, the component will receive a `shouldDispatchAnalytics` prop which can be a boolean or an (event) => boolean predicate.
 
 
 Example usage:
@@ -138,7 +138,7 @@ const EnhancedLoginPage = withAnalyticOnEvent({
     'User': localStorage.userName
   }
 })(LoginPage);
-ReactDOM.render(<EnhancedLoginPage analyticsExtras={{Source: 'Button'}} onButtonClick={(e) => console.log(e)} shouldDispatch={someBooleanRule && true} />);
+ReactDOM.render(<EnhancedLoginPage analyticsExtras={{Source: 'Button'}} onButtonClick={(e) => console.log(e)} shouldDispatchAnalytics={someBooleanRule && true} />);
 ```
 
 ### `withOnPropChangedAnalytic`
@@ -192,5 +192,35 @@ Example usage:
 login().then(
   (user) => analytics.transformDispatcher(dispatcher => dispatcher.withExtra('UserId', user.id))
 )
+
+```
+
+### `analyticsContextTypes`
+
+```js
+analyticsContextTypes: {
+  [key: string]: PropType
+}
+```
+
+The `analyticsContextTypes` object is the context prop types used for react-shisell.
+All inner components use it to communicate and access the underlying `dispatcher`.
+You should rarely need to use this directly.
+The `AnalyticsContext` export is the TS interface for the object in context.
+
+Example usage:
+```js
+import {analyticsContextTypes, AnalyticsContext} from 'react-shisell';
+
+class ComplicatedAnalytics extends React.Component {
+  static contextTypes = analyticsContextTypes;
+
+  context: AnalyticsContext;
+
+  componentDidMount() {
+    // Do things with the dispatcher here
+    this.context.analytics.dispatcher......;
+  }
+}
 
 ```

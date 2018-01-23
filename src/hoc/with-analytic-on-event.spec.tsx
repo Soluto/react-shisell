@@ -41,7 +41,7 @@ describe('withAnalyticOnEvent', () => {
         });
     });
 
-    it('Analytic not sent when shouldDispatch returns false', async () => {
+    it('Analytic not sent when shouldDispatchAnalytics returns false', async () => {
         const EnhancedComponent = compose(
             enrichAnalytics(identity),
             withAnalyticOnEvent({
@@ -50,7 +50,7 @@ describe('withAnalyticOnEvent', () => {
             })
         )(BaseComponent);
 
-        const result = renderer.create(<EnhancedComponent shouldDispatch={false} />);
+        const result = renderer.create(<EnhancedComponent shouldDispatchAnalytics={false} />);
 
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(0);
@@ -227,7 +227,7 @@ describe('withAnalyticOnEvent', () => {
             <EnhancedComponent
                 analyticsExtras={undefined}
                 analyticsIdentities={null}
-                shouldDispatch={true}
+                shouldDispatchAnalytics={true}
                 onClick={0}
             />
         );
