@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {wrapDisplayName} from 'recompose';
+import {wrapDisplayName} from '../wrapDisplayName';
 import {Requireable} from 'prop-types';
 
 import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
@@ -18,7 +18,7 @@ export const withAnalyticOnView = <TProps extends object>({
     analyticName,
     predicate = defaultPredicate,
     mapPropsToExtras = defaultPropsToExtrasMapper,
-}: WithAnalyticOnViewConfiguration<TProps>) => (BaseComponent: React.ComponentType<TProps>) =>
+}: WithAnalyticOnViewConfiguration<TProps>) => (BaseComponent: React.ReactType<TProps>) =>
     class WithAnalyticOnView extends React.Component<TProps> {
         context: AnalyticsContext;
 

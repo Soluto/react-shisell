@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as PropTypes from 'prop-types';
-import {wrapDisplayName} from 'recompose';
+import {wrapDisplayName} from '../wrapDisplayName';
 
 import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
 
@@ -67,7 +67,7 @@ export const withAnalyticOnEvent = <
     analyticName,
     extras: rawStaticExtras,
     identities: rawStaticIdentities,
-}: WithAnalyticOnEventConfiguration<Props, Event>) => (BaseComponent: React.ComponentType<Props>) =>
+}: WithAnalyticOnEventConfiguration<Props, Event>) => (BaseComponent: React.ReactType<Props>) =>
     addOldApiWarning(
         class WithAnalyticOnEvent extends React.Component<CombinedProps> {
             context: AnalyticsContext;
