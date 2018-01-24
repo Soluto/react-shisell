@@ -60,15 +60,16 @@ const addOldApiWarning = <T extends any>(Component: T) => {
 
 export const withAnalyticOnEvent = <
     Props extends {[_: string]: any},
-    Event extends object,
-    CombinedProps extends Props & WithAnalyticOnEventProps<Event>
+    Event extends object = React.SyntheticEvent<any>
 >({
     eventName,
     analyticName,
     extras: rawStaticExtras,
     identities: rawStaticIdentities,
-}: WithAnalyticOnEventConfiguration<Props, Event>) => (BaseComponent: React.ReactType<Props>) =>
-    addOldApiWarning(
+}: WithAnalyticOnEventConfiguration<Props, Event>) => (BaseComponent: React.ReactType<Props>) => {
+    type CombinedProps = Props & WithAnalyticOnEventProps<Event>;
+
+    return addOldApiWarning(
         class WithAnalyticOnEvent extends React.Component<CombinedProps> {
             context: AnalyticsContext;
 
@@ -126,3 +127,4 @@ export const withAnalyticOnEvent = <
             }
         }
     );
+}

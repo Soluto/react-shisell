@@ -7,8 +7,8 @@ import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-type
 export type TransformPropsFunc<In, Out> = (props: In) => Out;
 export interface WithAnalyticOnViewConfiguration<T> {
     analyticName: string;
-    predicate: (props: T) => boolean;
-    mapPropsToExtras: TransformPropsFunc<T, object>;
+    predicate?: (props: T) => boolean;
+    mapPropsToExtras?: TransformPropsFunc<T, object>;
 }
 
 const defaultPropsToExtrasMapper = () => ({});
