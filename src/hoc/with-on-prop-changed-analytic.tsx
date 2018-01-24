@@ -10,10 +10,10 @@ type TransformPropsFunc<In extends object, Out extends object> = (props: In) => 
 const defaultMapPropsToExtras = () => ({});
 const defaultValueFilter = () => true;
 
-export const withOnPropChangedAnalytic = <TProps extends {[_: string]: any}, TProp extends keyof TProps>(
-    propName: TProp,
+export const withOnPropChangedAnalytic = <TProps extends {[_: string]: any}>(
+    propName: string,
     analyticName: string,
-    valueFilter: Predicate2<TProp, TProp> = defaultValueFilter,
+    valueFilter: Predicate2<any, any> = defaultValueFilter,
     mapPropsToExtras: TransformPropsFunc<TProps, object> = defaultMapPropsToExtras
 ) => (BaseComponent: React.ReactType<TProps>) =>
     class WithOnPropChangedAnalytic extends React.Component<TProps> {
@@ -36,4 +36,4 @@ export const withOnPropChangedAnalytic = <TProps extends {[_: string]: any}, TPr
         render() {
             return <BaseComponent {...this.props} />;
         }
-    };
+    } as React.ComponentClass<TProps>;

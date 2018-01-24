@@ -43,4 +43,4 @@ export const enrichAnalytics = <Props extends object>(transformAnalyticsFunc: Tr
         render() {
             return <BaseComponent {...this.props} />;
         }
-    };
+    }  as React.ComponentClass<Props>;

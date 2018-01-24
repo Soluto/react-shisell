@@ -45,4 +45,4 @@ export const withAnalyticOnView = <TProps extends object>({
         render() {
             return <BaseComponent {...this.props} />;
         }
-    };
+    } as React.ComponentClass<TProps>;

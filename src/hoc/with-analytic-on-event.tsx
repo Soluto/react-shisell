@@ -36,7 +36,6 @@ const withAnalyticOnEventPropTypes = {
 };
 
 const getPossibleFunctionValue = <Event, FuncOrValue>(e: Event, f: FuncOrValue) => (typeof f === 'function' ? f(e) : f);
-const isDefined = (val: any) => typeof val !== 'undefined' && val !== null;
 const isBoolean = (val: any) => typeof val === 'boolean';
 const addOldApiWarning = <T extends any>(Component: T) => {
     if (process.env.NODE_ENV !== 'production') {
@@ -73,8 +72,8 @@ export const withAnalyticOnEvent = <
         class WithAnalyticOnEvent extends React.Component<CombinedProps> {
             context: AnalyticsContext;
 
-            static defaultProps = withAnalyticOnEventDefaultProps;
-            static propTypes = withAnalyticOnEventPropTypes;
+            static defaultProps = withAnalyticOnEventDefaultProps as any;
+            static propTypes = withAnalyticOnEventPropTypes as any;
             static contextTypes = analyticsContextTypes;
             static displayName = wrapDisplayName(BaseComponent, WithAnalyticOnEvent.name);
 
@@ -125,6 +124,6 @@ export const withAnalyticOnEvent = <
 
                 return <BaseComponent {...newProps as Props} />;
             }
-        }
+        } as React.ComponentClass<CombinedProps>
     );
 }
