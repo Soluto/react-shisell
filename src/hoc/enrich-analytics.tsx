@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {AnalyticsDispatcher} from 'shisell';
-import {wrapDisplayName} from 'recompose';
+import {wrapDisplayName} from '../wrapDisplayName';
 import {Requireable} from 'prop-types';
 
 import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
@@ -22,7 +22,7 @@ class LazyAnalytics {
 const defaultLazyAnalytics = new LazyAnalytics(() => Analytics.dispatcher);
 
 export const enrichAnalytics = <Props extends object>(transformAnalyticsFunc: TransformAnalyticsFunc<Props>) => (
-    BaseComponent: React.ComponentType<Props>
+    BaseComponent: React.ReactType<Props>
 ) =>
     class EnrichAnalytics extends React.Component<Props> {
         context: AnalyticsContext;
@@ -43,4 +43,4 @@ export const enrichAnalytics = <Props extends object>(transformAnalyticsFunc: Tr
         render() {
             return <BaseComponent {...this.props} />;
         }
-    };
+    }  as React.ComponentClass<Props>;

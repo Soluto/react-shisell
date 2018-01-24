@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {wrapDisplayName} from 'recompose';
+import {wrapDisplayName} from '../wrapDisplayName';
 import {Requireable} from 'prop-types';
 
 import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
@@ -10,12 +10,12 @@ type TransformPropsFunc<In extends object, Out extends object> = (props: In) => 
 const defaultMapPropsToExtras = () => ({});
 const defaultValueFilter = () => true;
 
-export const withOnPropChangedAnalytic = <TProps extends {[_: string]: any}, TProp extends keyof TProps>(
-    propName: TProp,
+export const withOnPropChangedAnalytic = <TProps extends {[_: string]: any}>(
+    propName: string,
     analyticName: string,
-    valueFilter: Predicate2<TProp, TProp> = defaultValueFilter,
+    valueFilter: Predicate2<any, any> = defaultValueFilter,
     mapPropsToExtras: TransformPropsFunc<TProps, object> = defaultMapPropsToExtras
-) => (BaseComponent: React.ComponentType<TProps>) =>
+) => (BaseComponent: React.ReactType<TProps>) =>
     class WithOnPropChangedAnalytic extends React.Component<TProps> {
         context: AnalyticsContext;
 
@@ -36,4 +36,4 @@ export const withOnPropChangedAnalytic = <TProps extends {[_: string]: any}, TPr
         render() {
             return <BaseComponent {...this.props} />;
         }
-    };
+    } as React.ComponentClass<TProps>;
