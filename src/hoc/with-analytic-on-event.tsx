@@ -37,19 +37,20 @@ const withAnalyticOnEventPropTypes = {
 
 const getPossibleFunctionValue = <Event, FuncOrValue>(e: Event, f: FuncOrValue) => (typeof f === 'function' ? f(e) : f);
 const isBoolean = (val: any) => typeof val === 'boolean';
-const addOldApiWarning = <T extends any>(Component: T) => {
+const addDeprecatedApiWarning = <T extends any>(Component: T) => {
     if (process.env.NODE_ENV !== 'production') {
+        let shouldWarnDeprecatedApi = true;
+        
         Component.prototype.componentDidMount = Component.prototype.componentDidUpdate = function() {
-            if (this.props.extras || this.props.identities || this.props.extrasProps) {
+            if (shouldWarnDeprecatedApi && this.props.extras || this.props.identities || this.props.extrasProps) {
                 console.warn(
-                    `Using old API in ${
+                    `Using deprecated API in ${
                         Component.displayName
                     }. withAnalyticOnEvent does not support extras/identities/extrasProps anymore. Please review the documentation in https://www.npmjs.com/package/react-shisell#withanalyticonevent`
                 );
 
                 // Warn only once
-                delete Component.prototype.componentDidMount;
-                delete Component.prototype.componentDidUpdate;
+                shouldWarnDeprecatedApi = false;
             }
         };
     }
@@ -68,7 +69,7 @@ export const withAnalyticOnEvent = <
 }: WithAnalyticOnEventConfiguration<Props, Event>) => (BaseComponent: React.ReactType<Props>) => {
     type CombinedProps = Props & WithAnalyticOnEventProps<Event>;
 
-    return addOldApiWarning(
+    return addDeprecatedApiWarning(
         class WithAnalyticOnEvent extends React.Component<CombinedProps> {
             context: AnalyticsContext;
 

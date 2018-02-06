@@ -23,6 +23,46 @@ describe('withAnalyticOnEvent', () => {
     beforeAll(() => Analytics.setWriter(writer));
     beforeEach(() => writer.mockReset());
 
+    describe('Deprecation warnings', () => {
+        const spy = jest.spyOn(console, 'warn');
+
+        beforeEach(() => spy.mockReset());
+        afterAll(() => spy.mockRestore());
+
+        it('Warns on deprecated prop names once per component', () => {
+            const EnhancedComponent = withAnalyticOnEvent({
+                eventName: 'onClick',
+                analyticName: 'TestAnalytic',
+            })(BaseComponent);
+
+            renderer.create(<EnhancedComponent extras={{}} shouldDispatchAnalytics={false} />);
+            renderer.create(<EnhancedComponent extras={{}} shouldDispatchAnalytics={false} />);
+
+            expect(spy).toHaveBeenCalledTimes(1);
+            expect(spy.mock.calls[0][0]).toContain('Using deprecated API');
+        });
+
+        it('Warns on deprecated prop names on all offending components, but just once', () => {
+            const EnhancedComponent1 = withAnalyticOnEvent({
+                eventName: 'onClick',
+                analyticName: 'TestAnalytic',
+            })('a');
+
+            const EnhancedComponent2 = withAnalyticOnEvent({
+                eventName: 'onClick',
+                analyticName: 'TestAnalytic',
+            })('a');
+
+            renderer.create(<EnhancedComponent1 extras={{}} shouldDispatchAnalytics={false} />);
+            renderer.create(<EnhancedComponent1 extras={{}} shouldDispatchAnalytics={false} />);
+            renderer.create(<EnhancedComponent2 extras={{}} shouldDispatchAnalytics={false} />);
+
+            expect(spy).toHaveBeenCalledTimes(2);
+            expect(spy.mock.calls[0][0]).toContain('Using deprecated API');
+            expect(spy.mock.calls[1][0]).toContain('Using deprecated API');
+        });
+    })
+
     it('Analytic sent when event handler is triggered', async () => {
         const EnhancedComponent = compose(
             enrichAnalytics(identity),
