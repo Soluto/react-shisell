@@ -9,7 +9,7 @@ import Analytics from '../analytics';
 import {runImmediate} from '../testUtils';
 
 interface Props {
-    prop1: number;
+    prop1?: number;
 }
 const Empty = (props: Props) => null;
 const identity = <T extends any>(f: T) => f;
@@ -29,7 +29,7 @@ describe('withOnPropChangedAnalytic', () => {
     it('Sends an analytic when the selected prop changes', async () => {
         const EnhancedComponent = compose<Props, Props>(
             enrichAnalytics(identity),
-            withOnPropChangedAnalytic('prop1', 'TestAnalytic')
+            withOnPropChangedAnalytic({propName: 'prop1', analyticName: 'TestAnalytic'})
         )(Empty);
 
         const result = renderer.create(<EnhancedComponent prop1={1} />);
@@ -47,7 +47,7 @@ describe('withOnPropChangedAnalytic', () => {
     it("Don't send an analytic when the selected prop does not change value", async () => {
         const EnhancedComponent = compose<Props, Props>(
             enrichAnalytics(identity),
-            withOnPropChangedAnalytic('prop1', 'TestAnalytic')
+            withOnPropChangedAnalytic({propName: 'prop1', analyticName: 'TestAnalytic'})
         )(Empty);
 
         const result = renderer.create(<EnhancedComponent prop1={1} />);
@@ -62,7 +62,7 @@ describe('withOnPropChangedAnalytic', () => {
     it('Respects change predicate returning false when deciding if to send analytics', async () => {
         const EnhancedComponent = compose<Props, Props>(
             enrichAnalytics(identity),
-            withOnPropChangedAnalytic('prop1', 'TestAnalytic', falseProvider)
+            withOnPropChangedAnalytic({propName: 'prop1', analyticName: 'TestAnalytic', valueFilter: falseProvider})
         )(Empty);
 
         const result = renderer.create(<EnhancedComponent prop1={1} />);
@@ -72,5 +72,38 @@ describe('withOnPropChangedAnalytic', () => {
         result.update(<EnhancedComponent prop1={2} />);
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(0);
+    });
+
+    it('Sends an analytic when component mounts if includeFirstValue set to true and prop meets filter', async () => {
+        const EnhancedComponent = compose<Props, Props>(
+            enrichAnalytics(identity),
+            withOnPropChangedAnalytic({propName: 'prop1', analyticName: 'TestAnalytic', includeFirstValue: true, valueFilter: (a,b) => b})
+        )(Empty);
+
+        const result = renderer.create(<EnhancedComponent prop1={1} />);
+        await runImmediate();
+        expect(writer).toHaveBeenCalledTimes(1);
+    });
+
+    it('Don\'t send an analytic when component mounts if includeFirstValue set to true and prop doesn\'t meet filter', async () => {
+        const EnhancedComponent = compose<Props, Props>(
+            enrichAnalytics(identity),
+            withOnPropChangedAnalytic({propName: 'prop1', analyticName: 'TestAnalytic', includeFirstValue: true, valueFilter: (a,b) => b})
+        )(Empty);
+
+        const result = renderer.create(<EnhancedComponent/>);
+        await runImmediate();
+        expect(writer).toHaveBeenCalledTimes(0);
+    });
+
+    it('Sends an analytic when component mounts if includeFirstValue set to true and valueFilter not provided', async () => {
+        const EnhancedComponent = compose<Props, Props>(
+            enrichAnalytics(identity),
+            withOnPropChangedAnalytic({propName: 'prop1', analyticName: 'TestAnalytic', includeFirstValue: true})
+        )(Empty);
+
+        const result = renderer.create(<EnhancedComponent/>);
+        await runImmediate();
+        expect(writer).toHaveBeenCalledTimes(1);
     });
 });

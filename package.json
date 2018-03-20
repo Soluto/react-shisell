@@ -1,6 +1,6 @@
 {
   "name": "react-shisell",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "description": "React HoC which add analytics to your components using shisell-js",
   "main": "dist/react-shisell.cjs.js",
   "module": "dist/react-shisell.es.js",

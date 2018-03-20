@@ -144,18 +144,22 @@ ReactDOM.render(<EnhancedLoginPage analyticsExtras={{Source: 'Button'}} onButton
 ### `withOnPropChangedAnalytic`
 
 ```js
-withOnPropChangedAnalytic(
+withOnPropChangedAnalytic({
     propName: string,
     analyticName: string,
     valueFilter?: (prevPropValue, nextPropValue) => boolean,
-    mapPropsToExtras?: (props) => object
-): HigherOrderComponent;
+    mapPropsToExtras?: (props) => object,
+    includeFirstValue?: boolean
+}): HigherOrderComponent;
 ```
 
 `withOnPropChangedAnalytic` triggers an analytic dispatch whenever a specified property changes.
 It's meant for cases where there's a property which signals a change in state, and that state change should be recorded as an analytic.
 For example, 'LoggingIn' becoming 'LoginFailure'.
-In these cases you usually only want to send the analytic once when the property changes, and not on every subsequent re-render.
+In these cases you usually only want to send the analytic once when the property changes, and not on every subsequent re-render.  
+
+`includeFirstValue` is set to false by default. If set to true, the valueFilter function will be tested on (undefined, firstPropValue) and will dispatch if true.  
+*Notice: providing `includeFirstValue: true` and not providing a valueFilter function will always result in dispatching on mount, regardless what's the specified prop value is.*
 
 Example usage:
 
@@ -163,11 +167,11 @@ Example usage:
 const LoginPage = (props) => ...;
 
 // The sent analytic will be LoginPage_Rendered as opposed to Rendered, because the scope was enhanced.
-const EnhancedLoginPage = withOnPropChangedAnalytic(
+const EnhancedLoginPage = withOnPropChangedAnalytic({
   propName: 'loginState',
   analyticName: 'Login_Failure',
   valueFilter: (previousValue, nextValue) => previousValue === 'LoggingIn' && nextValue === 'LoginFailure'
-)(LoginPage);
+})(LoginPage);
 ReactDOM.render(<EnhancedLoginPage onButtonClick={(e) => console.log(e)} />);
 ```
 
