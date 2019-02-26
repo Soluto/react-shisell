@@ -1,17 +1,15 @@
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
-
-import {enrichAnalytics} from './enrich-analytics';
 import Analytics from '../analytics';
-import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
-
 import {runImmediate} from '../testUtils';
+import {ShisellContext} from '../shisell-context';
+import {enrichAnalytics} from './enrich-analytics';
 
 class AnalyticsSender extends React.Component {
-    static contextTypes = analyticsContextTypes;
+    static contextType = ShisellContext;
 
     render() {
-        this.context.analytics.dispatcher.dispatch('TestAnalytic');
+        this.context.dispatcher.dispatch('TestAnalytic');
         return null;
     }
 }

@@ -1,8 +1,17 @@
-import * as React from 'react';
-import {wrapDisplayName as realWrapDisplayName} from 'recompose';
+import {ReactType} from 'react';
 
-// Recompose's types are broken. wrapDisplayName accepts strings but the type doesn't reflect that.
-// Need to send a PR to DefinitelyTyped, this will do meanwhile
-export function wrapDisplayName<T>(component: React.ReactType<T>, wrapperName: string) {
-    return realWrapDisplayName((component as any) as React.ComponentType<T>, wrapperName);
+const getDisplayName = (Component: ReactType) => {
+    if (typeof Component === 'string') {
+        return Component;
+    }
+
+    if (!Component) {
+        return undefined;
+    }
+
+    return Component.displayName || Component.name || 'Component';
+};
+
+export function wrapDisplayName<T>(BaseComponent: ReactType<T>, hocName: string) {
+    return `${hocName}(${getDisplayName(BaseComponent)})`;
 }

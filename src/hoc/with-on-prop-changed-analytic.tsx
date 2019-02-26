@@ -1,54 +1,51 @@
 import * as React from 'react';
+import {Component, ComponentClass, ReactType} from 'react';
 import {wrapDisplayName} from '../wrapDisplayName';
-import {Requireable} from 'prop-types';
+import {ShisellContext} from '../shisell-context';
 
-import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
+type Predicate<T1, T2> = (val1: T1, val2: T2) => boolean;
 
-export type Predicate2<T1, T2> = (val1: T1, val2: T2) => boolean;
-export type TransformPropsFunc<In, Out> = (props: In) => Out;
-
-export interface WithOnPropsChangedConfiguration<T> {
-    propName: string;
+export type WithOnPropsChangedConfiguration<T> = {
+    propName: keyof T;
     analyticName: string;
-    valueFilter?: Predicate2<any, any>;
-    mapPropsToExtras?: TransformPropsFunc<T, object>;
+    valueFilter?: Predicate<any, any>;
+    mapPropsToExtras?: (props: T) => {};
     includeFirstValue?: boolean;
-}
+};
 
 const defaultMapPropsToExtras = () => ({});
 const defaultValueFilter = () => true;
 
-export const withOnPropChangedAnalytic = <TProps extends {[_: string]: any}>({
+export const withOnPropChangedAnalytic = <TProps extends {}>({
     propName,
     analyticName,
     valueFilter = defaultValueFilter,
     mapPropsToExtras = defaultMapPropsToExtras,
     includeFirstValue = false,
-}: WithOnPropsChangedConfiguration<TProps>) => (BaseComponent: React.ReactType<TProps>) =>
-    class WithOnPropChangedAnalytic extends React.Component<TProps> {
-        context: AnalyticsContext;
+}: WithOnPropsChangedConfiguration<TProps>) => (BaseComponent: ReactType<TProps>): ComponentClass<TProps> =>
+    class extends Component<TProps> {
+        static contextType = ShisellContext;
+        static displayName = wrapDisplayName(BaseComponent, 'withOnPropChangedAnalytic');
 
-        static contextTypes = analyticsContextTypes;
-        static displayName = wrapDisplayName(BaseComponent, WithOnPropChangedAnalytic.name);
-
-        componentWillMount() {
+        componentDidMount() {
             if (includeFirstValue && valueFilter(undefined, this.props[propName])) {
-                this.context.analytics.dispatcher.withExtras(mapPropsToExtras(this.props)).dispatch(analyticName);
+                this.context.dispatcher.withExtras(mapPropsToExtras(this.props as any)).dispatch(analyticName);
             }
         }
 
-        componentWillReceiveProps(nextProps: TProps) {
+        componentDidUpdate(nextProps: TProps) {
             const prevProps = this.props;
 
             const prevValue = prevProps[propName];
             const nextValue = nextProps[propName];
 
             if (prevValue !== nextValue && valueFilter(prevValue, nextValue)) {
-                this.context.analytics.dispatcher.withExtras(mapPropsToExtras(nextProps)).dispatch(analyticName);
+                this.context.dispatcher.withExtras(mapPropsToExtras(nextProps)).dispatch(analyticName);
             }
         }
 
         render() {
+            // @ts-ignore
             return <BaseComponent {...this.props} />;
         }
-    } as React.ComponentClass<TProps>;
+    };
