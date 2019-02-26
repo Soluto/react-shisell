@@ -40,13 +40,13 @@ const isBoolean = (val: any) => typeof val === 'boolean';
 const addDeprecatedApiWarning = <T extends any>(Component: T) => {
     if (process.env.NODE_ENV !== 'production') {
         let shouldWarnDeprecatedApi = true;
-        
+
         Component.prototype.componentDidMount = Component.prototype.componentDidUpdate = function() {
-            if (shouldWarnDeprecatedApi && this.props.extras || this.props.identities || this.props.extrasProps) {
+            if ((shouldWarnDeprecatedApi && this.props.extras) || this.props.identities || this.props.extrasProps) {
                 console.warn(
                     `Using deprecated API in ${
                         Component.displayName
-                    }. withAnalyticOnEvent does not support extras/identities/extrasProps anymore. Please review the documentation in https://www.npmjs.com/package/react-shisell#withanalyticonevent`
+                    }. withAnalyticOnEvent does not support extras/identities/extrasProps anymore. Please review the documentation in https://www.npmjs.com/package/react-shisell#withanalyticonevent`,
                 );
 
                 // Warn only once
@@ -69,62 +69,59 @@ export const withAnalyticOnEvent = <
 }: WithAnalyticOnEventConfiguration<Props, Event>) => (BaseComponent: React.ReactType<Props>) => {
     type CombinedProps = Props & WithAnalyticOnEventProps<Event>;
 
-    return addDeprecatedApiWarning(
-        class WithAnalyticOnEvent extends React.Component<CombinedProps> {
-            context: AnalyticsContext;
+    return addDeprecatedApiWarning(class WithAnalyticOnEvent extends React.Component<CombinedProps> {
+        context: AnalyticsContext;
 
-            static defaultProps = withAnalyticOnEventDefaultProps as any;
-            static propTypes = withAnalyticOnEventPropTypes as any;
-            static contextTypes = analyticsContextTypes;
-            static displayName = wrapDisplayName(BaseComponent, WithAnalyticOnEvent.name);
+        static defaultProps = withAnalyticOnEventDefaultProps as any;
+        static propTypes = withAnalyticOnEventPropTypes as any;
+        static contextTypes = analyticsContextTypes;
+        static displayName = wrapDisplayName(BaseComponent, WithAnalyticOnEvent.name);
 
-            constructor(props: CombinedProps) {
-                super(props);
+        constructor(props: CombinedProps) {
+            super(props);
 
-                this.onEvent = this.onEvent.bind(this);
+            this.onEvent = this.onEvent.bind(this);
+        }
+
+        onEvent(e: Event) {
+            const {
+                shouldDispatchAnalytics: rawShouldDispatch,
+                analyticsExtras: rawPropExtras,
+                analyticsIdentities: rawPropIdentities,
+            } = this.props;
+            const shouldDispatch = getPossibleFunctionValue<Event, typeof rawShouldDispatch>(e, rawShouldDispatch);
+
+            if ((isBoolean(shouldDispatch) && shouldDispatch) || !isBoolean(shouldDispatch)) {
+                const propsExtras: ExtraAnalyticsData = getPossibleFunctionValue(e, rawPropExtras);
+                const propsIdentities: ExtraAnalyticsData = getPossibleFunctionValue(e, rawPropIdentities);
+                const staticExtras: ExtraAnalyticsData = getPossibleFunctionValue(e, rawStaticExtras);
+                const staticIdentities: ExtraAnalyticsData = getPossibleFunctionValue(e, rawStaticIdentities);
+
+                let {dispatcher} = this.context.analytics;
+                dispatcher = staticExtras ? dispatcher.withExtras(staticExtras) : dispatcher;
+                dispatcher = staticIdentities ? dispatcher.withIdentities(staticIdentities) : dispatcher;
+                dispatcher = propsExtras ? dispatcher.withExtras(propsExtras) : dispatcher;
+                dispatcher = propsIdentities ? dispatcher.withIdentities(propsIdentities) : dispatcher;
+                dispatcher.dispatch(analyticName);
             }
 
-            onEvent(e: Event) {
-                const {
-                    shouldDispatchAnalytics: rawShouldDispatch,
-                    analyticsExtras: rawPropExtras,
-                    analyticsIdentities: rawPropIdentities,
-                } = this.props;
-                const shouldDispatch = getPossibleFunctionValue<Event, typeof rawShouldDispatch>(e, rawShouldDispatch);
-
-                if ((isBoolean(shouldDispatch) && shouldDispatch) || !isBoolean(shouldDispatch)) {
-                    const propsExtras: ExtraAnalyticsData = getPossibleFunctionValue(e, rawPropExtras);
-                    const propsIdentities: ExtraAnalyticsData = getPossibleFunctionValue(e, rawPropIdentities);
-                    const staticExtras: ExtraAnalyticsData = getPossibleFunctionValue(e, rawStaticExtras);
-                    const staticIdentities: ExtraAnalyticsData = getPossibleFunctionValue(e, rawStaticIdentities);
-
-                    let {dispatcher} = this.context.analytics;
-                    dispatcher = staticExtras ? dispatcher.withExtras(staticExtras) : dispatcher;
-                    dispatcher = staticIdentities ? dispatcher.withIdentities(staticIdentities) : dispatcher;
-                    dispatcher = propsExtras ? dispatcher.withExtras(propsExtras) : dispatcher;
-                    dispatcher = propsIdentities ? dispatcher.withIdentities(propsIdentities) : dispatcher;
-                    dispatcher.dispatch(analyticName);
-                }
-
-                if (typeof this.props[eventName] === 'function') {
-                    this.props[eventName](e);
-                } else if (process.env.NODE_ENV !== 'prodution' && this.props[eventName]) {
-                    console.warn(
-                        `Expected function as an "${eventName}" prop in ${
-                            this.constructor.name
-                        }, instead got ${typeof this.props[eventName]}`
-                    );
-                }
+            if (typeof this.props[eventName] === 'function') {
+                this.props[eventName](e);
+            } else if (process.env.NODE_ENV !== 'prodution' && this.props[eventName]) {
+                console.warn(
+                    `Expected function as an "${eventName}" prop in ${this.constructor.name}, instead got ${typeof this
+                        .props[eventName]}`,
+                );
             }
+        }
 
-            render() {
-                const newProps: CombinedProps = {...(this.props as any), [eventName]: this.onEvent};
-                delete newProps.shouldDispatchAnalytics;
-                delete newProps.analyticsExtras;
-                delete newProps.analyticsIdentities;
+        render() {
+            const newProps: CombinedProps = {...(this.props as any), [eventName]: this.onEvent};
+            delete newProps.shouldDispatchAnalytics;
+            delete newProps.analyticsExtras;
+            delete newProps.analyticsIdentities;
 
-                return <BaseComponent {...newProps as Props} />;
-            }
-        } as React.ComponentClass<CombinedProps>
-    );
-}
+            return <BaseComponent {...newProps as Props} />;
+        }
+    } as React.ComponentClass<CombinedProps>);
+};

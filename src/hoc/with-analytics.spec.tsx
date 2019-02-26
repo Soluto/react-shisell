@@ -11,7 +11,10 @@ describe('withAnalytics', () => {
 
     it("Don't send an analytic when the selected prop does not change value", () => {
         const InnerComponent = jest.fn().mockImplementation(() => null);
-        const EnhancedComponent = compose(contextProvider, withAnalytics)(InnerComponent);
+        const EnhancedComponent = compose(
+            contextProvider,
+            withAnalytics,
+        )(InnerComponent);
 
         const result = renderer.create(<EnhancedComponent />);
         expect(InnerComponent).toHaveBeenCalledTimes(1);

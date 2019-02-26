@@ -22,7 +22,7 @@ class LazyAnalytics {
 const defaultLazyAnalytics = new LazyAnalytics(() => Analytics.dispatcher);
 
 export const enrichAnalytics = <Props extends object>(transformAnalyticsFunc: TransformAnalyticsFunc<Props>) => (
-    BaseComponent: React.ReactType<Props>
+    BaseComponent: React.ReactType<Props>,
 ) =>
     class EnrichAnalytics extends React.Component<Props> {
         context: AnalyticsContext;
@@ -43,4 +43,4 @@ export const enrichAnalytics = <Props extends object>(transformAnalyticsFunc: Tr
         render() {
             return <BaseComponent {...this.props} />;
         }
-    }  as React.ComponentClass<Props>;
+    } as React.ComponentClass<Props>;

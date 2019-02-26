@@ -8,7 +8,7 @@ export default {
         return analyticsDispatcher;
     },
     transformDispatcher(
-        dispatcherTransformFunc: (dispatcher: shisell.AnalyticsDispatcher) => shisell.AnalyticsDispatcher
+        dispatcherTransformFunc: (dispatcher: shisell.AnalyticsDispatcher) => shisell.AnalyticsDispatcher,
     ) {
         analyticsDispatcher = dispatcherTransformFunc(analyticsDispatcher);
     },

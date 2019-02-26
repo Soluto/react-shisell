@@ -61,7 +61,7 @@ describe('withAnalyticOnEvent', () => {
             expect(spy.mock.calls[0][0]).toContain('Using deprecated API');
             expect(spy.mock.calls[1][0]).toContain('Using deprecated API');
         });
-    })
+    });
 
     it('Analytic sent when event handler is triggered', async () => {
         const EnhancedComponent = compose(
@@ -69,7 +69,7 @@ describe('withAnalyticOnEvent', () => {
             withAnalyticOnEvent({
                 eventName: 'onClick',
                 analyticName: 'TestAnalytic',
-            })
+            }),
         )(BaseComponent);
 
         const result = renderer.create(<EnhancedComponent />);
@@ -87,7 +87,7 @@ describe('withAnalyticOnEvent', () => {
             withAnalyticOnEvent({
                 eventName: 'onClick',
                 analyticName: 'TestAnalytic',
-            })
+            }),
         )(BaseComponent);
 
         const result = renderer.create(<EnhancedComponent shouldDispatchAnalytics={false} />);
@@ -103,7 +103,7 @@ describe('withAnalyticOnEvent', () => {
             withAnalyticOnEvent({
                 eventName: 'onClick',
                 analyticName: 'TestAnalytic',
-            })
+            }),
         )(BaseComponent);
 
         const result = renderer.create(<EnhancedComponent onClick={eventHandler} />);
@@ -126,7 +126,7 @@ describe('withAnalyticOnEvent', () => {
             withAnalyticOnEvent({
                 eventName: 'onClick',
                 analyticName: 'TestAnalytic',
-            })
+            }),
         )(BaseComponent);
 
         const result = renderer.create(<EnhancedComponent analyticsExtras={{Name: 'Me'}} />);
@@ -147,7 +147,7 @@ describe('withAnalyticOnEvent', () => {
             withAnalyticOnEvent({
                 eventName: 'onClick',
                 analyticName: 'TestAnalytic',
-            })
+            }),
         )(BaseComponent);
 
         const result = renderer.create(<EnhancedComponent analyticsExtras={e => ({Source: e.source})} />);
@@ -168,7 +168,7 @@ describe('withAnalyticOnEvent', () => {
             withAnalyticOnEvent({
                 eventName: 'onClick',
                 analyticName: 'TestAnalytic',
-            })
+            }),
         )(BaseComponent);
 
         const result = renderer.create(<EnhancedComponent analyticsIdentities={{User: 'Me'}} />);
@@ -189,7 +189,7 @@ describe('withAnalyticOnEvent', () => {
             withAnalyticOnEvent({
                 eventName: 'onClick',
                 analyticName: 'TestAnalytic',
-            })
+            }),
         )(BaseComponent);
 
         const result = renderer.create(<EnhancedComponent analyticsIdentities={e => ({User: e.user})} />);
@@ -213,7 +213,7 @@ describe('withAnalyticOnEvent', () => {
                 identities: {
                     User: 'McCree',
                 },
-            })
+            }),
         )(BaseComponent);
 
         const result = renderer.create(<EnhancedComponent />);
@@ -237,7 +237,7 @@ describe('withAnalyticOnEvent', () => {
                 extras: {
                     Source: 'Some source',
                 },
-            })
+            }),
         )(BaseComponent);
 
         const result = renderer.create(<EnhancedComponent />);
@@ -260,7 +260,7 @@ describe('withAnalyticOnEvent', () => {
                 analyticName: 'TestAnalytic',
                 extras: null,
                 identities: undefined,
-            })
+            }),
         )(BaseComponent);
 
         const result = renderer.create(
@@ -269,7 +269,7 @@ describe('withAnalyticOnEvent', () => {
                 analyticsIdentities={null}
                 shouldDispatchAnalytics={true}
                 onClick={0}
-            />
+            />,
         );
 
         await runImmediate();

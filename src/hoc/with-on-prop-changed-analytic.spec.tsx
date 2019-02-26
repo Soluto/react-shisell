@@ -29,7 +29,7 @@ describe('withOnPropChangedAnalytic', () => {
     it('Sends an analytic when the selected prop changes', async () => {
         const EnhancedComponent = compose<Props, Props>(
             enrichAnalytics(identity),
-            withOnPropChangedAnalytic({propName: 'prop1', analyticName: 'TestAnalytic'})
+            withOnPropChangedAnalytic({propName: 'prop1', analyticName: 'TestAnalytic'}),
         )(Empty);
 
         const result = renderer.create(<EnhancedComponent prop1={1} />);
@@ -47,7 +47,7 @@ describe('withOnPropChangedAnalytic', () => {
     it("Don't send an analytic when the selected prop does not change value", async () => {
         const EnhancedComponent = compose<Props, Props>(
             enrichAnalytics(identity),
-            withOnPropChangedAnalytic({propName: 'prop1', analyticName: 'TestAnalytic'})
+            withOnPropChangedAnalytic({propName: 'prop1', analyticName: 'TestAnalytic'}),
         )(Empty);
 
         const result = renderer.create(<EnhancedComponent prop1={1} />);
@@ -62,7 +62,7 @@ describe('withOnPropChangedAnalytic', () => {
     it('Respects change predicate returning false when deciding if to send analytics', async () => {
         const EnhancedComponent = compose<Props, Props>(
             enrichAnalytics(identity),
-            withOnPropChangedAnalytic({propName: 'prop1', analyticName: 'TestAnalytic', valueFilter: falseProvider})
+            withOnPropChangedAnalytic({propName: 'prop1', analyticName: 'TestAnalytic', valueFilter: falseProvider}),
         )(Empty);
 
         const result = renderer.create(<EnhancedComponent prop1={1} />);
@@ -77,7 +77,12 @@ describe('withOnPropChangedAnalytic', () => {
     it('Sends an analytic when component mounts if includeFirstValue set to true and prop meets filter', async () => {
         const EnhancedComponent = compose<Props, Props>(
             enrichAnalytics(identity),
-            withOnPropChangedAnalytic({propName: 'prop1', analyticName: 'TestAnalytic', includeFirstValue: true, valueFilter: (a,b) => b})
+            withOnPropChangedAnalytic({
+                propName: 'prop1',
+                analyticName: 'TestAnalytic',
+                includeFirstValue: true,
+                valueFilter: (a, b) => b,
+            }),
         )(Empty);
 
         const result = renderer.create(<EnhancedComponent prop1={1} />);
@@ -85,13 +90,18 @@ describe('withOnPropChangedAnalytic', () => {
         expect(writer).toHaveBeenCalledTimes(1);
     });
 
-    it('Don\'t send an analytic when component mounts if includeFirstValue set to true and prop doesn\'t meet filter', async () => {
+    it("Don't send an analytic when component mounts if includeFirstValue set to true and prop doesn't meet filter", async () => {
         const EnhancedComponent = compose<Props, Props>(
             enrichAnalytics(identity),
-            withOnPropChangedAnalytic({propName: 'prop1', analyticName: 'TestAnalytic', includeFirstValue: true, valueFilter: (a,b) => b})
+            withOnPropChangedAnalytic({
+                propName: 'prop1',
+                analyticName: 'TestAnalytic',
+                includeFirstValue: true,
+                valueFilter: (a, b) => b,
+            }),
         )(Empty);
 
-        const result = renderer.create(<EnhancedComponent/>);
+        const result = renderer.create(<EnhancedComponent />);
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(0);
     });
@@ -99,10 +109,10 @@ describe('withOnPropChangedAnalytic', () => {
     it('Sends an analytic when component mounts if includeFirstValue set to true and valueFilter not provided', async () => {
         const EnhancedComponent = compose<Props, Props>(
             enrichAnalytics(identity),
-            withOnPropChangedAnalytic({propName: 'prop1', analyticName: 'TestAnalytic', includeFirstValue: true})
+            withOnPropChangedAnalytic({propName: 'prop1', analyticName: 'TestAnalytic', includeFirstValue: true}),
         )(Empty);
 
-        const result = renderer.create(<EnhancedComponent/>);
+        const result = renderer.create(<EnhancedComponent />);
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
     });

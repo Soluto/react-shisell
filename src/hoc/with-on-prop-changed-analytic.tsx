@@ -23,7 +23,7 @@ export const withOnPropChangedAnalytic = <TProps extends {[_: string]: any}>({
     analyticName,
     valueFilter = defaultValueFilter,
     mapPropsToExtras = defaultMapPropsToExtras,
-    includeFirstValue = false
+    includeFirstValue = false,
 }: WithOnPropsChangedConfiguration<TProps>) => (BaseComponent: React.ReactType<TProps>) =>
     class WithOnPropChangedAnalytic extends React.Component<TProps> {
         context: AnalyticsContext;

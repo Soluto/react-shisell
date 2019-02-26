@@ -22,7 +22,7 @@ describe('withAnalyticOnMount', () => {
             enrichAnalytics(identity),
             withAnalyticOnView({
                 analyticName: 'TestAnalytic',
-            })
+            }),
         )(Empty);
 
         const result = renderer.create(<EnhancedComponent />);
@@ -44,7 +44,7 @@ describe('withAnalyticOnMount', () => {
                     .fn()
                     .mockReturnValueOnce(false)
                     .mockReturnValueOnce(true),
-            })
+            }),
         )(Empty);
 
         const result = renderer.create(<EnhancedComponent />);
