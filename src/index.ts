@@ -8,5 +8,6 @@ export {
 } from './hoc/with-analytic-on-event';
 export {withAnalyticOnView, WithAnalyticOnViewConfiguration} from './hoc/with-analytic-on-view';
 export {withOnPropChangedAnalytic, WithOnPropsChangedConfiguration} from './hoc/with-on-prop-changed-analytic';
-export {ShisellContext, Analytics} from './shisell-context';
+export {Analytics} from './shisell-context';
+export {useAnalytics} from './hooks/use-analytics';
 export {default as analytics} from './analytics';

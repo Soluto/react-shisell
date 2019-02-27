@@ -14,6 +14,8 @@ Its most basic design principle is that at the root of the react tree is the wri
     -   [`withAnalyticOnView`](#withanalyticonview)
     -   [`withAnalyticOnEvent`](#withanalyticonevent)
     -   [`withOnPropChangedAnalytic`](#withonpropchangedanalytic)
+-   Hooks
+    -   [`useAnalytics`](#useanalytics)
 -   Others
 
     -   [`analytics`](#analytics)
@@ -179,6 +181,22 @@ const EnhancedLoginPage = withOnPropChangedAnalytic({
 ReactDOM.render(<EnhancedLoginPage onButtonClick={(e) => console.log(e)} />);
 ```
 
+### `useAnalytics`
+
+react hook that returns an object which contains a `dispatcher` of type `shisell.AnalyticsDispatcher` which lets any component freely dispatch analytics using the dispatcher currently in context.
+same as `withAnalytics` but with hooks.
+
+Example usage:
+
+```js
+const MyComponent = props => {
+    const analytics = useAnalytics();
+    useEffect(() => analytics.dispatcher.createScoped('MyComponent').dispatch('Loaded'), []);
+
+    return <div>Hello Shisell</div>;
+};
+```
+
 ### `analytics`
 
 ```js
@@ -198,19 +216,4 @@ Example usage:
 
 ```js
 login().then(user => analytics.transformDispatcher(dispatcher => dispatcher.withExtra('UserId', user.id)));
-```
-
-### `ShisellContext`
-
-All the Higher ordered components are base on react's Context. this package exposes the `ShisellContext` object that can be used to create other HOC's, and in react hooks.
-
-Example usage:
-
-```js
-const MyComponent = props => {
-    const analytics = useContext(ShisellContext);
-    useEffect(() => analytics.dispatcher.createScoped('MyComponent').dispatch('Loaded'), []);
-
-    return <div>Hello Shisell</div>;
-};
 ```
