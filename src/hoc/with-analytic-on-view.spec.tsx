@@ -1,15 +1,10 @@
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
-import {compose} from 'recompose';
-
-import {withAnalyticOnView} from './with-analytic-on-view';
-import {enrichAnalytics} from './enrich-analytics';
 import Analytics from '../analytics';
-
 import {runImmediate} from '../testUtils';
+import {withAnalyticOnView} from './with-analytic-on-view';
 
 const Empty = () => null;
-const identity = <T extends any>(f: T) => f;
 
 describe('withAnalyticOnMount', () => {
     const writer = jest.fn();
@@ -18,12 +13,9 @@ describe('withAnalyticOnMount', () => {
     beforeEach(() => writer.mockReset());
 
     it('Sends the analytic on mount', async () => {
-        const EnhancedComponent = compose(
-            enrichAnalytics(identity),
-            withAnalyticOnView({
-                analyticName: 'TestAnalytic',
-            })
-        )(Empty);
+        const EnhancedComponent = withAnalyticOnView({
+            analyticName: 'TestAnalytic',
+        })(Empty);
 
         const result = renderer.create(<EnhancedComponent />);
 
@@ -36,16 +28,13 @@ describe('withAnalyticOnMount', () => {
     });
 
     it('Sends the analytic only after predicate is true', async () => {
-        const EnhancedComponent = compose(
-            enrichAnalytics(identity),
-            withAnalyticOnView({
-                analyticName: 'TestAnalytic',
-                predicate: jest
-                    .fn()
-                    .mockReturnValueOnce(false)
-                    .mockReturnValueOnce(true),
-            })
-        )(Empty);
+        const EnhancedComponent = withAnalyticOnView({
+            analyticName: 'TestAnalytic',
+            predicate: jest
+                .fn()
+                .mockReturnValueOnce(false)
+                .mockReturnValueOnce(true),
+        })(Empty);
 
         const result = renderer.create(<EnhancedComponent />);
         await runImmediate();

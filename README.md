@@ -1,21 +1,26 @@
 # React Shisell
+
 ## Overview
+
 React Shisell builds on [shisell](https://github.com/Soluto/shisell-js) and lets you easily integrate analytics into [react](https://github.com/facebook/react) apps.
 
 Its most basic design principle is that at the root of the react tree is the writer which does the actual writing to your favorite analytics service, and any component in the react tree enhance the shisell analytics dispatcher and add another Scope/ExtraData/Identity/etc.
 
 ## API
 
-* Higher order components
-  + [`withAnalytics`](#withanalytics)
-  + [`withoutAnalytics`](#withoutanalytics)
-  + [`enrichAnalytics`](#enrichanalytics)
-  + [`withAnalyticOnView`](#withanalyticonview)
-  + [`withAnalyticOnEvent`](#withanalyticonevent)
-  + [`withOnPropChangedAnalytic`](#withonpropchangedanalytic)
-* Others
-  + [`analytics`](#analytics)
-  
+-   Higher order components
+    -   [`withAnalytics`](#withanalytics)
+    -   [`enrichAnalytics`](#enrichanalytics)
+    -   [`withAnalyticOnView`](#withanalyticonview)
+    -   [`withAnalyticOnEvent`](#withanalyticonevent)
+    -   [`withOnPropChangedAnalytic`](#withonpropchangedanalytic)
+-   Hooks
+    -   [`useAnalytics`](#useanalytics)
+-   Others
+
+    -   [`analytics`](#analytics)
+    -   [`ShisellContext`](#shisellcontext)
+
 ### `withAnalytics`
 
 Adds a prop called `analytics` which contains a `dispatcher` of type `shisell.AnalyticsDispatcher` which lets any component freely dispatch analytics using the dispatcher currently in context.
@@ -36,11 +41,6 @@ class LoginPage extends React.Component {
 const EnhancedLoginPage = withAnalytics(LoginPage);
 ReactDOM.render(<EnhancedLoginPage />);
 ```
-
-### `withoutAnalytics`
-
-Does the reverse of [`withAnalytics`](#withanalytics) - removes the `analytics` prop from the props.
-Usually used in conjuction with [`withAnalytics`](#withanalytics) to add analytics, manipulate them using something like `recompose`'s `withHandlers`, and then clean up afterwards.
 
 ### `enrichAnalytics`
 
@@ -120,25 +120,31 @@ withAnalyticOnEvent({
 For example, a button that triggers some action, and dispatches an analytic.
 The `eventName` is also the name of the prop the event handler will be injected into (if it already exists, it will be wrapped).
 There are two ways to add data to the sent analytic:
+
 1. Statically - with `extras` and `identities` which will let you add extras/identities from the event itself, or just as a static object.
 2. Dynamically with props - the resulting component will accept an `analyticsExtras` and `analyticsIdentities` props which behave the same as their static counterparts.
-    In addition, the component will receive a `shouldDispatchAnalytics` prop which can be a boolean or an (event) => boolean predicate.
-
+   In addition, the component will receive a `shouldDispatchAnalytics` prop which can be a boolean or an (event) => boolean predicate.
 
 Example usage:
 
 ```js
-const LoginPage = (props) => <button onClick={onButtonClick}>Login here</button>;
+const LoginPage = props => <button onClick={onButtonClick}>Login here</button>;
 
 // The sent analytic will be LoginPage_Rendered as opposed to Rendered, because the scope was enhanced.
 const EnhancedLoginPage = withAnalyticOnEvent({
-  eventName: 'onButtonClick',
-  analyticName: 'LoginButton_Clicked',
-  identities: {
-    'User': localStorage.userName
-  }
+    eventName: 'onButtonClick',
+    analyticName: 'LoginButton_Clicked',
+    identities: {
+        User: localStorage.userName,
+    },
 })(LoginPage);
-ReactDOM.render(<EnhancedLoginPage analyticsExtras={{Source: 'Button'}} onButtonClick={(e) => console.log(e)} shouldDispatchAnalytics={someBooleanRule && true} />);
+ReactDOM.render(
+    <EnhancedLoginPage
+        analyticsExtras={{Source: 'Button'}}
+        onButtonClick={e => console.log(e)}
+        shouldDispatchAnalytics={someBooleanRule && true}
+    />,
+);
 ```
 
 ### `withOnPropChangedAnalytic`
@@ -156,10 +162,10 @@ withOnPropChangedAnalytic({
 `withOnPropChangedAnalytic` triggers an analytic dispatch whenever a specified property changes.
 It's meant for cases where there's a property which signals a change in state, and that state change should be recorded as an analytic.
 For example, 'LoggingIn' becoming 'LoginFailure'.
-In these cases you usually only want to send the analytic once when the property changes, and not on every subsequent re-render.  
+In these cases you usually only want to send the analytic once when the property changes, and not on every subsequent re-render.
 
 `includeFirstValue` is set to false by default. If set to true, the valueFilter function will be tested on (undefined, firstPropValue) and will dispatch if true.  
-*Notice: providing `includeFirstValue: true` and not providing a valueFilter function will always result in dispatching on mount, regardless what's the specified prop value is.*
+_Notice: providing `includeFirstValue: true` and not providing a valueFilter function will always result in dispatching on mount, regardless what's the specified prop value is._
 
 Example usage:
 
@@ -173,6 +179,22 @@ const EnhancedLoginPage = withOnPropChangedAnalytic({
   valueFilter: (previousValue, nextValue) => previousValue === 'LoggingIn' && nextValue === 'LoginFailure'
 })(LoginPage);
 ReactDOM.render(<EnhancedLoginPage onButtonClick={(e) => console.log(e)} />);
+```
+
+### `useAnalytics`
+
+react hook that returns an object which contains a `dispatcher` of type `shisell.AnalyticsDispatcher` which lets any component freely dispatch analytics using the dispatcher currently in context.
+same as `withAnalytics` but with hooks.
+
+Example usage:
+
+```js
+const MyComponent = props => {
+    const analytics = useAnalytics();
+    useEffect(() => analytics.dispatcher.createScoped('MyComponent').dispatch('Loaded'), []);
+
+    return <div>Hello Shisell</div>;
+};
 ```
 
 ### `analytics`
@@ -191,40 +213,7 @@ It's used to dynamically set the event writer, and to transform the dispatcher f
 For example, after successfuly logging in, you'd want all analytics sent to include a `UserId` identity.
 
 Example usage:
-```js
-
-login().then(
-  (user) => analytics.transformDispatcher(dispatcher => dispatcher.withExtra('UserId', user.id))
-)
-
-```
-
-### `analyticsContextTypes`
 
 ```js
-analyticsContextTypes: {
-  [key: string]: PropType
-}
-```
-
-The `analyticsContextTypes` object is the context prop types used for react-shisell.
-All inner components use it to communicate and access the underlying `dispatcher`.
-You should rarely need to use this directly.
-The `AnalyticsContext` export is the TS interface for the object in context.
-
-Example usage:
-```js
-import {analyticsContextTypes, AnalyticsContext} from 'react-shisell';
-
-class ComplicatedAnalytics extends React.Component {
-  static contextTypes = analyticsContextTypes;
-
-  context: AnalyticsContext;
-
-  componentDidMount() {
-    // Do things with the dispatcher here
-    this.context.analytics.dispatcher......;
-  }
-}
-
+login().then(user => analytics.transformDispatcher(dispatcher => dispatcher.withExtra('UserId', user.id)));
 ```

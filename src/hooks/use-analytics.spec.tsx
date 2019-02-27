@@ -1,18 +1,22 @@
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
-import {ShisellContext} from '../shisell-context';
-import {withAnalytics} from './with-analytics';
+import {Analytics, ShisellContext} from '../shisell-context';
+import {useAnalytics} from './use-analytics';
+import {FunctionComponent} from 'react';
 
-describe('withAnalytics', () => {
+describe('useAnalytics', () => {
     const ANALYTICS: any = 'some analytics';
 
     it("Don't send an analytic when the selected prop does not change value", () => {
-        const InnerComponent = () => null;
-        const EnhancedComponent = withAnalytics(InnerComponent);
+        const InnerComponent: FunctionComponent<{analytics: Analytics}> = () => null;
+        const HookComponent = () => {
+            const analytics = useAnalytics();
+            return <InnerComponent analytics={analytics} />;
+        };
 
         const result = renderer.create(
             <ShisellContext.Provider value={ANALYTICS}>
-                <EnhancedComponent />
+                <HookComponent />
             </ShisellContext.Provider>,
         );
 

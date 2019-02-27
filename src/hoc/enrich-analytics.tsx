@@ -1,17 +1,13 @@
 import * as React from 'react';
+import {Component, ComponentClass, ComponentType} from 'react';
 import {AnalyticsDispatcher} from 'shisell';
 import {wrapDisplayName} from '../wrapDisplayName';
-import {Requireable} from 'prop-types';
-
-import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
-import {withAnalytics} from './with-analytics';
-import {withoutAnalytics} from './without-analytics';
-import Analytics from '../analytics';
+import {Analytics, ShisellContext} from '../shisell-context';
 
 type TransformAnalyticsFunc<T> = (dispatcher: AnalyticsDispatcher, props: T) => AnalyticsDispatcher;
 type DispatcherFactory = () => AnalyticsDispatcher;
 
-class LazyAnalytics {
+class LazyAnalytics implements Analytics {
     constructor(private dispatcherFactory: DispatcherFactory) {}
 
     get dispatcher() {
@@ -19,28 +15,20 @@ class LazyAnalytics {
     }
 }
 
-const defaultLazyAnalytics = new LazyAnalytics(() => Analytics.dispatcher);
+export function enrichAnalytics<Props>(transformAnalyticsFunc: TransformAnalyticsFunc<Props>) {
+    return (BaseComponent: ComponentType<Props>): ComponentClass<Props> =>
+        class extends Component<Props> {
+            static contextType = ShisellContext;
+            static displayName = wrapDisplayName(BaseComponent, 'enrichAnalytics');
 
-export const enrichAnalytics = <Props extends object>(transformAnalyticsFunc: TransformAnalyticsFunc<Props>) => (
-    BaseComponent: React.ReactType<Props>
-) =>
-    class EnrichAnalytics extends React.Component<Props> {
-        context: AnalyticsContext;
+            analytics = new LazyAnalytics(() => transformAnalyticsFunc(this.context.dispatcher, this.props as any));
 
-        static contextTypes = analyticsContextTypes;
-        static childContextTypes = analyticsContextTypes;
-        static displayName = wrapDisplayName(BaseComponent, EnrichAnalytics.name);
-
-        getChildContext() {
-            const analytics = this.context.analytics || defaultLazyAnalytics;
-            const newAnalytics = new LazyAnalytics(() => transformAnalyticsFunc(analytics.dispatcher, this.props));
-
-            return {
-                analytics: newAnalytics as any,
-            };
-        }
-
-        render() {
-            return <BaseComponent {...this.props} />;
-        }
-    }  as React.ComponentClass<Props>;
+            render() {
+                return (
+                    <ShisellContext.Provider value={this.analytics}>
+                        <BaseComponent {...this.props} />
+                    </ShisellContext.Provider>
+                );
+            }
+        };
+}

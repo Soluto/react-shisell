@@ -1,14 +1,12 @@
 import * as React from 'react';
+import {Component, ComponentClass, ReactType} from 'react';
+import {ShisellContext} from '../shisell-context';
 import {wrapDisplayName} from '../wrapDisplayName';
-import {Requireable} from 'prop-types';
 
-import analyticsContextTypes, {AnalyticsContext} from '../analytics-context-types';
-
-export type TransformPropsFunc<In, Out> = (props: In) => Out;
 export interface WithAnalyticOnViewConfiguration<T> {
     analyticName: string;
     predicate?: (props: T) => boolean;
-    mapPropsToExtras?: TransformPropsFunc<T, object>;
+    mapPropsToExtras?: (props: T) => object;
 }
 
 const defaultPropsToExtrasMapper = () => ({});
@@ -18,19 +16,18 @@ export const withAnalyticOnView = <TProps extends object>({
     analyticName,
     predicate = defaultPredicate,
     mapPropsToExtras = defaultPropsToExtrasMapper,
-}: WithAnalyticOnViewConfiguration<TProps>) => (BaseComponent: React.ReactType<TProps>) =>
-    class WithAnalyticOnView extends React.Component<TProps> {
-        context: AnalyticsContext;
+}: WithAnalyticOnViewConfiguration<TProps>) => (BaseComponent: ReactType<TProps>): ComponentClass<TProps> =>
+    class WithAnalyticOnView extends Component<TProps> {
+        static contextType = ShisellContext;
 
-        static contextTypes = analyticsContextTypes;
-        static displayName = wrapDisplayName(BaseComponent, WithAnalyticOnView.name);
+        static displayName = wrapDisplayName(BaseComponent, 'withAnalyticOnView');
 
         didSendAnalytic = false;
 
         trySendAnalytic() {
-            if (this.didSendAnalytic || !predicate(this.props)) return;
+            if (this.didSendAnalytic || !predicate(this.props as TProps)) return;
 
-            this.context.analytics.dispatcher.withExtras(mapPropsToExtras(this.props)).dispatch(analyticName);
+            this.context.dispatcher.withExtras(mapPropsToExtras(this.props as TProps)).dispatch(analyticName);
             this.didSendAnalytic = true;
         }
 
@@ -43,6 +40,7 @@ export const withAnalyticOnView = <TProps extends object>({
         }
 
         render() {
+            // @ts-ignore
             return <BaseComponent {...this.props} />;
         }
-    } as React.ComponentClass<TProps>;
+    };
