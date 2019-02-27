@@ -49,7 +49,6 @@ export const withAnalyticOnEvent = <Props extends {}, Event extends object = Syn
     BaseComponent: ReactType<Props>,
 ): ComponentClass<Props & WithAnalyticOnEventProps<Event>> => {
     type CombinedProps = Props & WithAnalyticOnEventProps<Event>;
-    let shouldWarnDeprecatedApi = process.env.NODE_ENV !== 'production';
 
     return class WithAnalyticOnEvent extends Component<CombinedProps> {
         static contextType = ShisellContext;
@@ -62,20 +61,6 @@ export const withAnalyticOnEvent = <Props extends {}, Event extends object = Syn
             super(props);
 
             this.onEvent = this.onEvent.bind(this);
-        }
-
-        componentDidMount() {
-            // @ts-ignore
-            if (shouldWarnDeprecatedApi && (this.props.extras || this.props.identities || this.props.extrasProps)) {
-                console.warn(
-                    `Using deprecated API in ${
-                        WithAnalyticOnEvent.displayName
-                    }. withAnalyticOnEvent does not support extras/identities/extrasProps anymore. Please review the documentation in https://www.npmjs.com/package/react-shisell#withanalyticonevent`,
-                );
-
-                // Warn only once
-                shouldWarnDeprecatedApi = false;
-            }
         }
 
         onEvent(e: Event) {
