@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {createContext, Context} from 'react';
 import {AnalyticsDispatcher} from 'shisell';
 import analytics from './analytics';
@@ -12,4 +13,6 @@ export const ShisellContext = createContext<Analytics>({
     },
 });
 
-ShisellContext.displayName = 'Shisell';
+ShisellContext.displayName = 'Analytics';
+
+export const AnalyticsConsumer = ShisellContext.Consumer;
