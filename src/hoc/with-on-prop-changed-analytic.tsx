@@ -21,23 +21,23 @@ type OnPropChangedAnalyticProps = WithAnalyticsProps & {
     analyticName: string;
     valueFilter: Predicate<any, any>;
     includeFirstValue?: boolean;
-    extraData: {};
+    getExtraData: () => {};
     value: any;
 };
 
 class OnPropChangedAnalytic extends Component<OnPropChangedAnalyticProps> {
     componentDidMount() {
-        const {includeFirstValue, valueFilter, value, analytics, extraData, analyticName} = this.props;
+        const {includeFirstValue, valueFilter, value, analytics, getExtraData, analyticName} = this.props;
         if (includeFirstValue && valueFilter(undefined, value)) {
-            analytics.dispatcher.withExtras(extraData).dispatch(analyticName);
+            analytics.dispatcher.withExtras(getExtraData()).dispatch(analyticName);
         }
     }
 
     componentDidUpdate({value: prevValue}: OnPropChangedAnalyticProps) {
-        const {value: nextValue, valueFilter, analytics, extraData, analyticName} = this.props;
+        const {value: nextValue, valueFilter, analytics, getExtraData, analyticName} = this.props;
 
         if (prevValue !== nextValue && valueFilter(prevValue, nextValue)) {
-            analytics.dispatcher.withExtras(extraData).dispatch(analyticName);
+            analytics.dispatcher.withExtras(getExtraData()).dispatch(analyticName);
         }
     }
 
@@ -61,7 +61,7 @@ export const withOnPropChangedAnalytic = <TProps extends {}>({
                     analyticName={analyticName}
                     valueFilter={valueFilter}
                     includeFirstValue={includeFirstValue}
-                    extraData={mapPropsToExtras(props)}
+                    getExtraData={() => mapPropsToExtras(props)}
                     value={props[propName]}
                 >
                     {
