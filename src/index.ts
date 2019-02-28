@@ -1,4 +1,4 @@
-export {withAnalytics} from './hoc/with-analytics';
+export {withAnalytics, WithAnalyticsProps} from './hoc/with-analytics';
 export {enrichAnalytics} from './hoc/enrich-analytics';
 export {
     withAnalyticOnEvent,

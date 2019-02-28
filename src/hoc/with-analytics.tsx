@@ -7,8 +7,10 @@ export type WithAnalyticsProps = {
     analytics: Analytics;
 };
 
-export function withAnalytics<TProps>(BaseComponent: ComponentType<TProps & WithAnalyticsProps>) {
-    const EnhancedComponent: FunctionComponent<TProps> = props => (
+export function withAnalytics<TProps extends WithAnalyticsProps>(BaseComponent: ComponentType<TProps>) {
+    const EnhancedComponent: FunctionComponent<
+        Pick<TProps, Exclude<keyof TProps, keyof WithAnalyticsProps>>
+    > = props => (
         <ShisellContext.Consumer>
             {analytics => <BaseComponent {...props} analytics={analytics} />}
         </ShisellContext.Consumer>
