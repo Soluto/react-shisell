@@ -1,8 +1,9 @@
 import * as React from 'react';
-import {Component, ComponentClass, ReactType, SyntheticEvent} from 'react';
+import {Component, FunctionComponent, ReactElement, ReactType, SyntheticEvent} from 'react';
 import * as PropTypes from 'prop-types';
 import {wrapDisplayName} from '../wrapDisplayName';
 import {ShisellContext} from '../shisell-context';
+import {WithAnalyticsProps} from './with-analytics';
 
 export interface ExtraAnalyticsDataProvider<Event> {
     (event: Event): {};
@@ -40,68 +41,100 @@ const getPossibleFunctionValue = <Event, Value>(e: Event, f: ((e: Event) => Valu
     typeof f === 'function' ? f(e) : f;
 const isBoolean = (val: any) => typeof val === 'boolean';
 
+type AnalyticOnEventProps = WithAnalyticsProps & {
+    children: (event: Function) => ReactElement;
+    event: Function;
+    eventName: string;
+    analyticName: string;
+    analyticsExtras?: DataMapper<any>;
+    analyticsIdentities?: DataMapper<any>;
+    shouldDispatchAnalytics?: boolean | Predicate<any>;
+    staticExtras?: DataMapper<any>;
+    staticIdentities?: DataMapper<any>;
+    displayName: string;
+};
+
+class AnalyticOnEvent extends Component<AnalyticOnEventProps> {
+    onEvent = (e: Event) => {
+        const {
+            event,
+            eventName,
+            shouldDispatchAnalytics,
+            analyticsExtras,
+            analyticsIdentities,
+            staticExtras: rawStaticExtras,
+            staticIdentities: rawStaticIdentities,
+            analyticName,
+            analytics,
+            displayName,
+        } = this.props;
+        const shouldDispatch = getPossibleFunctionValue<Event, boolean>(e, shouldDispatchAnalytics);
+
+        if ((isBoolean(shouldDispatch) && shouldDispatch) || !isBoolean(shouldDispatch)) {
+            const propsExtras = getPossibleFunctionValue(e, analyticsExtras);
+            const propsIdentities = getPossibleFunctionValue(e, analyticsIdentities);
+            const staticExtras = getPossibleFunctionValue(e, rawStaticExtras);
+            const staticIdentities = getPossibleFunctionValue(e, rawStaticIdentities);
+
+            let {dispatcher} = analytics;
+            dispatcher = staticExtras ? dispatcher.withExtras(staticExtras) : dispatcher;
+            dispatcher = staticIdentities ? dispatcher.withIdentities(staticIdentities) : dispatcher;
+            dispatcher = propsExtras ? dispatcher.withExtras(propsExtras) : dispatcher;
+            dispatcher = propsIdentities ? dispatcher.withIdentities(propsIdentities) : dispatcher;
+            dispatcher.dispatch(analyticName);
+        }
+
+        if (typeof event === 'function') {
+            (event as Function)(e);
+        } else if (process.env.NODE_ENV !== 'prodution' && event) {
+            console.warn(`Expected function as an "${eventName}" prop in ${displayName}, instead got ${typeof event}`);
+        }
+    };
+
+    render() {
+        return this.props.children(this.onEvent);
+    }
+}
+
 export const withAnalyticOnEvent = <Props extends {}, Event extends object = SyntheticEvent<any>>({
     eventName,
     analyticName,
-    extras: rawStaticExtras,
-    identities: rawStaticIdentities,
-}: WithAnalyticOnEventConfiguration<Props, Event>) => (
-    BaseComponent: ReactType<Props>,
-): ComponentClass<Props & WithAnalyticOnEventProps<Event>> => {
+    extras,
+    identities,
+}: WithAnalyticOnEventConfiguration<Props, Event>) => (BaseComponent: ReactType<Props>) => {
     type CombinedProps = Props & WithAnalyticOnEventProps<Event>;
 
-    return class WithAnalyticOnEvent extends Component<CombinedProps> {
-        static contextType = ShisellContext;
+    const EnhancedComponent: FunctionComponent<CombinedProps> = ({
+        [eventName]: rawEvent,
+        analyticsExtras,
+        analyticsIdentities,
+        shouldDispatchAnalytics,
+        ...props
+    }: any) => (
+        <ShisellContext.Consumer>
+            {analytics => (
+                <AnalyticOnEvent
+                    analytics={analytics}
+                    event={rawEvent}
+                    eventName={eventName as string}
+                    analyticName={analyticName}
+                    analyticsExtras={analyticsExtras}
+                    analyticsIdentities={analyticsIdentities}
+                    shouldDispatchAnalytics={shouldDispatchAnalytics}
+                    staticExtras={extras}
+                    staticIdentities={identities}
+                    displayName={EnhancedComponent.displayName!}
+                >
+                    {event => {
+                        // @ts-ignore
+                        return <BaseComponent {...{[eventName]: event}} {...props} />;
+                    }}
+                </AnalyticOnEvent>
+            )}
+        </ShisellContext.Consumer>
+    );
 
-        static defaultProps = withAnalyticOnEventDefaultProps as any;
-        static propTypes = withAnalyticOnEventPropTypes as any;
-        static displayName = wrapDisplayName(BaseComponent, 'withAnalyticOnEvent');
+    EnhancedComponent.displayName = wrapDisplayName(BaseComponent, 'withAnalyticOnEvent');
 
-        constructor(props: CombinedProps) {
-            super(props);
-
-            this.onEvent = this.onEvent.bind(this);
-        }
-
-        onEvent(e: Event) {
-            const {shouldDispatchAnalytics, analyticsExtras, analyticsIdentities} = this.props;
-            const shouldDispatch = getPossibleFunctionValue<Event, boolean>(e, shouldDispatchAnalytics);
-
-            if ((isBoolean(shouldDispatch) && shouldDispatch) || !isBoolean(shouldDispatch)) {
-                const propsExtras = getPossibleFunctionValue(e, analyticsExtras);
-                const propsIdentities = getPossibleFunctionValue(e, analyticsIdentities);
-                const staticExtras = getPossibleFunctionValue(e, rawStaticExtras);
-                const staticIdentities = getPossibleFunctionValue(e, rawStaticIdentities);
-
-                let {dispatcher} = this.context;
-                dispatcher = staticExtras ? dispatcher.withExtras(staticExtras) : dispatcher;
-                dispatcher = staticIdentities ? dispatcher.withIdentities(staticIdentities) : dispatcher;
-                dispatcher = propsExtras ? dispatcher.withExtras(propsExtras) : dispatcher;
-                dispatcher = propsIdentities ? dispatcher.withIdentities(propsIdentities) : dispatcher;
-                dispatcher.dispatch(analyticName);
-            }
-
-            const event = this.props[eventName];
-
-            if (typeof event === 'function') {
-                (event as Function)(e);
-            } else if (process.env.NODE_ENV !== 'prodution' && event) {
-                console.warn(
-                    `Expected function as an "${eventName}" prop in ${
-                        WithAnalyticOnEvent.displayName
-                    }, instead got ${typeof event}`,
-                );
-            }
-        }
-
-        render() {
-            const newProps: CombinedProps = {...(this.props as any), [eventName]: this.onEvent};
-            delete newProps.shouldDispatchAnalytics;
-            delete newProps.analyticsExtras;
-            delete newProps.analyticsIdentities;
-
-            // @ts-ignore
-            return <BaseComponent {...newProps as Props} />;
-        }
-    };
+    return EnhancedComponent;
 };

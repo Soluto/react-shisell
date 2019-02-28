@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Component, ComponentClass, ComponentType} from 'react';
+import {Component, ComponentType, FunctionComponent} from 'react';
 import {AnalyticsDispatcher} from 'shisell';
 import {wrapDisplayName} from '../wrapDisplayName';
 import {Analytics, ShisellContext} from '../shisell-context';
@@ -15,20 +15,27 @@ class LazyAnalytics implements Analytics {
     }
 }
 
+class EnrichAnalytics extends Component<{getDispatcher: DispatcherFactory}> {
+    readonly analytics = new LazyAnalytics(() => this.props.getDispatcher());
+    render() {
+        return <ShisellContext.Provider value={this.analytics}>{this.props.children} </ShisellContext.Provider>;
+    }
+}
+
 export function enrichAnalytics<Props>(transformAnalyticsFunc: TransformAnalyticsFunc<Props>) {
-    return (BaseComponent: ComponentType<Props>): ComponentClass<Props> =>
-        class extends Component<Props> {
-            static contextType = ShisellContext;
-            static displayName = wrapDisplayName(BaseComponent, 'enrichAnalytics');
+    return (BaseComponent: ComponentType<Props>) => {
+        const EnhancedComponent: FunctionComponent<Props> = props => (
+            <ShisellContext.Consumer>
+                {analytics => (
+                    <EnrichAnalytics getDispatcher={() => transformAnalyticsFunc(analytics.dispatcher, props)}>
+                        <BaseComponent {...props} />
+                    </EnrichAnalytics>
+                )}
+            </ShisellContext.Consumer>
+        );
 
-            analytics = new LazyAnalytics(() => transformAnalyticsFunc(this.context.dispatcher, this.props as any));
+        EnhancedComponent.displayName = wrapDisplayName(BaseComponent, 'enrichAnalytics');
 
-            render() {
-                return (
-                    <ShisellContext.Provider value={this.analytics}>
-                        <BaseComponent {...this.props} />
-                    </ShisellContext.Provider>
-                );
-            }
-        };
+        return EnhancedComponent;
+    };
 }
