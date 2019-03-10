@@ -47,4 +47,19 @@ describe('withAnalyticOnMount', () => {
             Name: 'TestAnalytic',
         });
     });
+
+    it('Sends the analytic with identities', async () => {
+        const EnhancedComponent = withAnalyticOnView({
+            analyticName: 'TestAnalytic',
+            mapPropsToIdentities: () => ({sessionId: 'a1b2c3', deviceId: 'd4e5f6'}),
+        })(Empty);
+
+        renderer.create(<EnhancedComponent />);
+        await runImmediate();
+        expect(writer).toHaveBeenCalledTimes(1);
+        expect(writer.mock.calls[0][0]).toMatchObject({
+            Name: 'TestAnalytic',
+            Identities: {sessionId: 'a1b2c3', deviceId: 'd4e5f6'},
+        });
+    });
 });
