@@ -18,7 +18,7 @@ class LazyAnalytics implements Analytics {
 class EnrichAnalytics extends Component<{getDispatcher: DispatcherFactory}> {
     readonly analytics = new LazyAnalytics(() => this.props.getDispatcher());
     render() {
-        return <ShisellContext.Provider value={this.analytics}>{this.props.children} </ShisellContext.Provider>;
+        return <ShisellContext.Provider value={this.analytics}>{this.props.children}</ShisellContext.Provider>;
     }
 }
 
