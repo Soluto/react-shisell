@@ -14,7 +14,7 @@ describe('withAnalyticOnEvent', () => {
     it('Dispatcher is called when event is triggered', () => {
         const dispatcher = jest.fn();
         const TestComponent = () => {
-            const onClick = useEventAnalytic(null, dispatcher);
+            const onClick = useEventAnalytic(dispatcher);
 
             return <span onClick={onClick} />;
         };
@@ -28,7 +28,7 @@ describe('withAnalyticOnEvent', () => {
         const eventHandler = jest.fn();
         const dispatcher = jest.fn();
         const TestComponent = () => {
-            const onClick = useEventAnalytic(eventHandler, dispatcher);
+            const onClick = useEventAnalytic(dispatcher, eventHandler);
 
             return <span onClick={onClick} />;
         };
@@ -43,7 +43,7 @@ describe('withAnalyticOnEvent', () => {
         const shisellDispatcher = jest.fn();
         const dispatcher = jest.fn();
         const TestComponent = () => {
-            const onClick = useEventAnalytic(null, dispatcher);
+            const onClick = useEventAnalytic(dispatcher);
 
             return <span onClick={onClick} />;
         };
@@ -60,7 +60,7 @@ describe('withAnalyticOnEvent', () => {
 
     it('Returns new event handler only when deps or context changes', () => {
         const TestComponent = (props: {value: number}) => {
-            const onClick = useEventAnalytic(null, () => {}, [props.value]);
+            const onClick = useEventAnalytic(() => {}, null, [props.value]);
 
             return <span onClick={onClick} />;
         };

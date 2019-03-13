@@ -4,8 +4,8 @@ import {AnalyticsDispatcher} from 'shisell';
 import {useAnalytics} from './use-analytics';
 
 export function useEventAnalytic<EventType extends React.SyntheticEvent>(
-    eventHandler: React.EventHandler<EventType> | null | undefined,
     dispatch: (dispatcher: AnalyticsDispatcher) => void,
+    eventHandler: React.EventHandler<EventType> | null | undefined,
     deps: ReadonlyArray<any> = [],
 ) {
     verifyHooksExist('withAnalyticOnEvent');
