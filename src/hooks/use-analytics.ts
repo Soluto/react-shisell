@@ -1,10 +1,9 @@
 import * as React from 'react';
 import {ShisellContext, Analytics} from '../shisell-context';
+import {verifyHooksExist} from './verify-hooks-exist';
 
 export function useAnalytics(): Analytics {
-    if (typeof React.useContext === 'undefined') {
-        throw new Error('Hooks are not supported in this react version. use `withAnalytics` instead.');
-    }
+    verifyHooksExist('withAnalytics');
 
     return React.useContext(ShisellContext);
 }
