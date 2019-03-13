@@ -46,7 +46,7 @@ ReactDOM.render(<EnhancedLoginPage />);
 
 ```js
 enrichAnalytics(
-  (analytics: shisell.AnalyticsDispatcher) => shisell.AnalyticsDispatcher
+  (analytics: shisell.AnalyticsDispatcher, props: object) => shisell.AnalyticsDispatcher
 ): HigherOrderComponent;
 ```
 
