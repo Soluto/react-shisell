@@ -5,7 +5,7 @@ import {useAnalytics} from './use-analytics';
 
 export function useEventAnalytic<EventType extends React.SyntheticEvent>(
     dispatch: (dispatcher: AnalyticsDispatcher) => void,
-    eventHandler: React.EventHandler<EventType> | null | undefined,
+    eventHandler?: React.EventHandler<EventType> | null,
     deps: ReadonlyArray<any> = [],
 ) {
     verifyHooksExist('withAnalyticOnEvent');
