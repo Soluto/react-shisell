@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {Component, FunctionComponent} from 'react';
+import * as PropTypes from 'prop-types';
 import {AnalyticsDispatcher} from 'shisell';
 import {Analytics, ShisellContext} from './shisell-context';
 
@@ -39,4 +40,8 @@ export const AnalyticsProvider: FunctionComponent<AnalyticsProviderProps> = ({di
     }
 
     return <LazyAnalyticsProvider getDispatcher={() => dispatcher}>{children}</LazyAnalyticsProvider>;
+};
+
+AnalyticsProvider.propTypes = {
+    dispatcher: PropTypes.oneOfType([PropTypes.instanceOf(AnalyticsDispatcher), PropTypes.func]).isRequired,
 };
