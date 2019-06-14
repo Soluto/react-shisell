@@ -11,4 +11,5 @@ export {withOnPropChangedAnalytic, WithOnPropsChangedConfiguration} from './hoc/
 export {Analytics, AnalyticsConsumer} from './shisell-context';
 export {useAnalytics} from './hooks/use-analytics';
 export {useEventAnalytic} from './hooks/use-event-analytic';
+export {AnalyticsProvider, AnalyticsProviderProps} from './analytics-provider';
 export {default as analytics} from './analytics';
