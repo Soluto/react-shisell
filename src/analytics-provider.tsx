@@ -1,9 +1,9 @@
 import * as React from 'react';
-import {Component} from 'react';
+import {Component, FunctionComponent} from 'react';
 import {AnalyticsDispatcher} from 'shisell';
 import {Analytics, ShisellContext} from './shisell-context';
 
-export type DispatcherFactory = () => AnalyticsDispatcher;
+type DispatcherFactory = () => AnalyticsDispatcher;
 
 class LazyAnalytics implements Analytics {
     constructor(private dispatcherFactory: DispatcherFactory) {}
@@ -13,14 +13,30 @@ class LazyAnalytics implements Analytics {
     }
 }
 
-export type AnalyticsProviderProps = {getDispatcher: DispatcherFactory};
-
-export class AnalyticsProvider extends Component<AnalyticsProviderProps> {
-    static displayName = 'AnalyticsProvider';
-
+class LazyAnalyticsProvider extends Component<{getDispatcher: DispatcherFactory}> {
     readonly analytics = new LazyAnalytics(() => this.props.getDispatcher());
 
     render() {
         return <ShisellContext.Provider value={this.analytics}>{this.props.children}</ShisellContext.Provider>;
     }
 }
+
+export type AnalyticsProviderProps = {
+    dispatcher: AnalyticsDispatcher | ((dispatcher: AnalyticsDispatcher) => AnalyticsDispatcher);
+};
+
+export const AnalyticsProvider: FunctionComponent<AnalyticsProviderProps> = ({dispatcher, children}) => {
+    if (typeof dispatcher === 'function') {
+        return (
+            <ShisellContext.Consumer>
+                {analytics => (
+                    <LazyAnalyticsProvider getDispatcher={() => dispatcher(analytics.dispatcher)}>
+                        {children}
+                    </LazyAnalyticsProvider>
+                )}
+            </ShisellContext.Consumer>
+        );
+    }
+
+    return <LazyAnalyticsProvider getDispatcher={() => dispatcher}>{children}</LazyAnalyticsProvider>;
+};
