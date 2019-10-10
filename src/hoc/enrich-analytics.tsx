@@ -4,7 +4,7 @@ import {AnalyticsDispatcher} from 'shisell';
 import {wrapDisplayName} from '../wrapDisplayName';
 import {AnalyticsProvider} from '../analytics-provider';
 
-type TransformAnalyticsFunc<T> = (dispatcher: AnalyticsDispatcher, props: T) => AnalyticsDispatcher;
+type TransformAnalyticsFunc<T> = (dispatcher: AnalyticsDispatcher<void>, props: T) => AnalyticsDispatcher<void>;
 
 export function enrichAnalytics<Props>(transformAnalyticsFunc: TransformAnalyticsFunc<Props>) {
     return (BaseComponent: ComponentType<Props>) => {

@@ -4,7 +4,7 @@ import {AnalyticsDispatcher} from 'shisell';
 import {useAnalytics} from './use-analytics';
 
 export function useEventAnalytic<EventType extends React.SyntheticEvent>(
-    dispatch: (dispatcher: AnalyticsDispatcher) => void,
+    dispatch: (dispatcher: AnalyticsDispatcher<void>) => void,
     eventHandler?: React.EventHandler<EventType> | null,
     deps: ReadonlyArray<any> = [],
 ) {
