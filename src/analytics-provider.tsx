@@ -4,7 +4,7 @@ import * as PropTypes from 'prop-types';
 import {AnalyticsDispatcher} from 'shisell';
 import {Analytics, ShisellContext} from './shisell-context';
 
-type DispatcherFactory = () => AnalyticsDispatcher;
+type DispatcherFactory = () => AnalyticsDispatcher<void>;
 
 class LazyAnalytics implements Analytics {
     constructor(private dispatcherFactory: DispatcherFactory) {}
@@ -23,7 +23,7 @@ class LazyAnalyticsProvider extends Component<{getDispatcher: DispatcherFactory}
 }
 
 export type AnalyticsProviderProps = {
-    dispatcher: AnalyticsDispatcher | ((dispatcher: AnalyticsDispatcher) => AnalyticsDispatcher);
+    dispatcher: AnalyticsDispatcher<void> | ((dispatcher: AnalyticsDispatcher<void>) => AnalyticsDispatcher<void>);
 };
 
 export const AnalyticsProvider: FunctionComponent<AnalyticsProviderProps> = ({dispatcher, children}) => {

@@ -4,7 +4,7 @@ import {AnalyticsDispatcher} from 'shisell';
 import analytics from './analytics';
 
 export type Analytics = {
-    dispatcher: AnalyticsDispatcher;
+    dispatcher: AnalyticsDispatcher<void>;
 };
 
 export const ShisellContext = createContext<Analytics>({
