@@ -16,10 +16,10 @@ Its most basic design principle is that at the root of the react tree is the wri
     -   [`withOnPropChangedAnalytic`](#withonpropchangedanalytic)
 -   Hooks
     -   [`useAnalytics`](#useanalytics)
+    -   [`useAnalytic`](#useanalytic)
 -   Others
-
+    -   [`AnalyticsProvider`](#analyticsprovider)
     -   [`analytics`](#analytics)
-    -   [`ShisellContext`](#shisellcontext)
 
 ### `withAnalytics`
 
@@ -195,6 +195,38 @@ const MyComponent = props => {
 
     return <div>Hello Shisell</div>;
 };
+```
+
+### `useAnalytic`
+
+React hook to create analytic dispatcher functions. Simpler than using the analytics context from `useAnalytics()`
+
+Example usage:
+
+```ts
+// create function to dispatch event
+const sendEvent = useAnalytic('eventName');
+sendEvent();
+
+// wrap function to dispatch event, call wrapped function
+const onClickWithAnalytic = useAnalytic('eventName', onClick);
+onClickWithAnalytic();
+
+// wrapped function with args / return value
+const fetchWithAnalytic = useAnalytic('eventName', fetch);
+const value = await fetchWithAnalytic('arg');
+```
+
+### `AnalyticsProvider`
+
+React analytics context provider to override or transform the analytics dispatcher
+
+Example usage:
+
+```tsx
+const ExampleComponent = ({user, children}: ExampleComponentProps) => (
+    <AnalyticsProvider dispatcher={dispatcher => dispatcher.withExtra('UserId', user.id)}>{children}</AnalyticsProvider>
+);
 ```
 
 ### `analytics`
