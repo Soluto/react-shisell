@@ -10,6 +10,7 @@ export {withAnalyticOnView, WithAnalyticOnViewConfiguration} from './hoc/with-an
 export {withOnPropChangedAnalytic, WithOnPropsChangedConfiguration} from './hoc/with-on-prop-changed-analytic';
 export {Analytics, AnalyticsConsumer} from './shisell-context';
 export {useAnalytics} from './hooks/use-analytics';
+export {useAnalytic} from './hooks/use-analytic';
 export {useEventAnalytic} from './hooks/use-event-analytic';
 export {AnalyticsProvider, AnalyticsProviderProps} from './analytics-provider';
 export {default as analytics} from './analytics';
