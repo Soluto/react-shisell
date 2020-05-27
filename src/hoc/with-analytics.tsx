@@ -12,7 +12,7 @@ export function withAnalytics<TProps extends WithAnalyticsProps>(BaseComponent: 
         Pick<TProps, Exclude<keyof TProps, keyof WithAnalyticsProps>>
     > = props => (
         <ShisellContext.Consumer>
-            {analytics => <BaseComponent {...props} analytics={analytics} />}
+            {analytics => <BaseComponent {...(props as TProps)} analytics={analytics} />}
         </ShisellContext.Consumer>
     );
 
