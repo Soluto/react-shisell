@@ -1,17 +1,17 @@
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
 import Analytics from '../analytics';
-import {useAnalytic} from './use-analytic';
+import {useAnalyticCallback} from './use-analytic-callback';
 import {runImmediate} from '../testUtils';
 
-describe('useAnalytic', () => {
+describe('useAnalyticCallback', () => {
     const writer = jest.fn();
     beforeAll(() => Analytics.setWriter(writer));
     beforeEach(() => writer.mockReset());
 
     it('Returns a function that dispatches an analytic when called', async () => {
         const TestComponent = () => {
-            const onClick = useAnalytic('eventName');
+            const onClick = useAnalyticCallback('eventName');
 
             return <span onClick={onClick} />;
         };
@@ -28,7 +28,7 @@ describe('useAnalytic', () => {
         const testFn = jest.fn().mockImplementation((arg: string) => arg);
 
         const TestComponent = () => {
-            const onClick = useAnalytic('eventName', testFn);
+            const onClick = useAnalyticCallback('eventName', testFn);
 
             return <span onClick={onClick} />;
         };

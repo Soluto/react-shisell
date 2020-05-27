@@ -197,7 +197,7 @@ const MyComponent = props => {
 };
 ```
 
-### `useAnalytic`
+### `useAnalyticCallback`
 
 React hook to create analytic dispatcher functions. Simpler than using the analytics context from `useAnalytics()`
 
@@ -205,15 +205,15 @@ Example usage:
 
 ```ts
 // create function to dispatch event
-const sendEvent = useAnalytic('eventName');
+const sendEvent = useAnalyticCallback('eventName');
 sendEvent();
 
 // wrap function to dispatch event, call wrapped function
-const onClickWithAnalytic = useAnalytic('eventName', onClick);
+const onClickWithAnalytic = useAnalyticCallback('eventName', onClick);
 onClickWithAnalytic();
 
 // wrapped function with args / return value
-const fetchWithAnalytic = useAnalytic('eventName', fetch);
+const fetchWithAnalytic = useAnalyticCallback('eventName', fetch);
 const value = await fetchWithAnalytic('arg');
 ```
 
