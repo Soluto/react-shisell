@@ -38,7 +38,7 @@ const withAnalyticOnEventPropTypes = {
 };
 
 const getPossibleFunctionValue = <Event, Value>(e: Event, f: ((e: Event) => Value) | Value | undefined) =>
-    typeof f === 'function' ? f(e) : f;
+    typeof f === 'function' ? (f as Function)(e) : f;
 const isBoolean = (val: any) => typeof val === 'boolean';
 
 type AnalyticOnEventProps = WithAnalyticsProps & {

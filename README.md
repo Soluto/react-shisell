@@ -16,7 +16,7 @@ Its most basic design principle is that at the root of the react tree is the wri
     -   [`withOnPropChangedAnalytic`](#withonpropchangedanalytic)
 -   Hooks
     -   [`useAnalytics`](#useanalytics)
-    -   [`useAnalytic`](#useanalytic)
+    -   [`useAnalyticCallback`](#useanalyticcallback)
 -   Others
     -   [`AnalyticsProvider`](#analyticsprovider)
     -   [`analytics`](#analytics)
