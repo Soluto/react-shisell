@@ -31,7 +31,7 @@ Example usage:
 class LoginPage extends React.Component {
     componentDidMount() {
         this.props.analytics.dispatcher
-          .withExtra('key', 'value')
+          .extend(withExtra('key', 'value'))
           .dispatch('Rendered');
     }
 
@@ -59,7 +59,7 @@ Example usage:
 class LoginPage extends React.Component {
     componentDidMount() {
         this.props.analytics.dispatcher
-          .withExtraData('key', 'value')
+          .extend(withExtraData('key', 'value'))
           .dispatch('Rendered');
     }
 
@@ -69,7 +69,7 @@ class LoginPage extends React.Component {
 // The sent analytic will be LoginPage_Rendered as opposed to Rendered, because the scope was enhanced.
 const EnhancedLoginPage = compose(
   enrichAnalytics(
-    dispatcher => dispatcher.createScoped('LoginPage')
+    dispatcher => dispatcher.extend(createScoped('LoginPage'))
   ),
   withAnalytics,
 )(MyComponent);
@@ -191,7 +191,7 @@ Example usage:
 ```js
 const MyComponent = props => {
     const analytics = useAnalytics();
-    useEffect(() => analytics.dispatcher.createScoped('MyComponent').dispatch('Loaded'), []);
+    useEffect(() => analytics.dispatcher.extend(createScoped('MyComponent')).dispatch('Loaded'), []);
 
     return <div>Hello Shisell</div>;
 };
@@ -225,7 +225,9 @@ Example usage:
 
 ```tsx
 const ExampleComponent = ({user, children}: ExampleComponentProps) => (
-    <AnalyticsProvider dispatcher={dispatcher => dispatcher.withExtra('UserId', user.id)}>{children}</AnalyticsProvider>
+    <AnalyticsProvider dispatcher={dispatcher => dispatcher.extend(withExtra('UserId', user.id))}>
+        {children}
+    </AnalyticsProvider>
 );
 ```
 
@@ -247,5 +249,5 @@ For example, after successfuly logging in, you'd want all analytics sent to incl
 Example usage:
 
 ```js
-login().then(user => analytics.transformDispatcher(dispatcher => dispatcher.withExtra('UserId', user.id)));
+login().then(user => analytics.transformDispatcher(dispatcher => dispatcher.extend(withExtra('UserId', user.id))));
 ```
