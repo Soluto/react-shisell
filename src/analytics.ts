@@ -1,4 +1,3 @@
-import 'shisell/legacy';
 import * as shisell from 'shisell';
 
 let customWriter: shisell.EventModelWriter<void> = () => {};

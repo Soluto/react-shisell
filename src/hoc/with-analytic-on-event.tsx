@@ -4,6 +4,7 @@ import * as PropTypes from 'prop-types';
 import {wrapDisplayName} from '../wrapDisplayName';
 import {ShisellContext} from '../shisell-context';
 import {WithAnalyticsProps} from './with-analytics';
+import {withExtras, withIdentities} from 'shisell/extenders';
 
 export interface ExtraAnalyticsDataProvider<Event> {
     (event: Event): {};
@@ -77,10 +78,10 @@ class AnalyticOnEvent extends Component<AnalyticOnEventProps> {
             const staticIdentities = getPossibleFunctionValue(e, rawStaticIdentities);
 
             let {dispatcher} = analytics;
-            dispatcher = staticExtras ? dispatcher.withExtras(staticExtras) : dispatcher;
-            dispatcher = staticIdentities ? dispatcher.withIdentities(staticIdentities) : dispatcher;
-            dispatcher = propsExtras ? dispatcher.withExtras(propsExtras) : dispatcher;
-            dispatcher = propsIdentities ? dispatcher.withIdentities(propsIdentities) : dispatcher;
+            dispatcher = staticExtras ? dispatcher.extend(withExtras(staticExtras)) : dispatcher;
+            dispatcher = staticIdentities ? dispatcher.extend(withIdentities(staticIdentities)) : dispatcher;
+            dispatcher = propsExtras ? dispatcher.extend(withExtras(propsExtras)) : dispatcher;
+            dispatcher = propsIdentities ? dispatcher.extend(withIdentities(propsIdentities)) : dispatcher;
             dispatcher.dispatch(analyticName);
         }
 

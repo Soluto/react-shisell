@@ -3,6 +3,7 @@ import {Component, FunctionComponent, ReactType} from 'react';
 import {wrapDisplayName} from '../wrapDisplayName';
 import {ShisellContext} from '../shisell-context';
 import {WithAnalyticsProps} from './with-analytics';
+import {withExtras} from 'shisell/extenders';
 
 type Predicate<T1, T2> = (val1: T1, val2: T2) => boolean;
 
@@ -29,7 +30,7 @@ class OnPropChangedAnalytic extends Component<OnPropChangedAnalyticProps> {
     componentDidMount() {
         const {includeFirstValue, valueFilter, value, analytics, getExtraData, analyticName} = this.props;
         if (includeFirstValue && valueFilter(undefined, value)) {
-            analytics.dispatcher.withExtras(getExtraData()).dispatch(analyticName);
+            analytics.dispatcher.extend(withExtras(getExtraData())).dispatch(analyticName);
         }
     }
 
@@ -37,7 +38,7 @@ class OnPropChangedAnalytic extends Component<OnPropChangedAnalyticProps> {
         const {value: nextValue, valueFilter, analytics, getExtraData, analyticName} = this.props;
 
         if (prevValue !== nextValue && valueFilter(prevValue, nextValue)) {
-            analytics.dispatcher.withExtras(getExtraData()).dispatch(analyticName);
+            analytics.dispatcher.extend(withExtras(getExtraData())).dispatch(analyticName);
         }
     }
 
