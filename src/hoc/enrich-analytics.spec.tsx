@@ -4,6 +4,7 @@ import Analytics from '../analytics';
 import {runImmediate} from '../testUtils';
 import {ShisellContext} from '../shisell-context';
 import {enrichAnalytics} from './enrich-analytics';
+import {createScoped} from 'shisell/extenders';
 
 class AnalyticsSender extends React.Component {
     static contextType = ShisellContext;
@@ -24,7 +25,9 @@ describe('enrichAnalytics', () => {
     });
 
     it('Applies transformation to dispatchers below in context', async () => {
-        const EnhancedComponent = enrichAnalytics(dispatcher => dispatcher.createScoped('Rawr'))(AnalyticsSender);
+        const EnhancedComponent = enrichAnalytics(dispatcher => dispatcher.extend(createScoped('Rawr')))(
+            AnalyticsSender,
+        );
 
         const result = renderer.create(<EnhancedComponent />);
 
