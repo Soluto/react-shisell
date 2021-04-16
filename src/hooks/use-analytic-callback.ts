@@ -9,16 +9,16 @@ export function useAnalyticCallback<T extends AnyFn>(
     fn: T,
 ): (...args: Parameters<T>) => ReturnType<T>;
 export function useAnalyticCallback(eventName: string, fn?: AnyFn): AnyFn {
-    const {dispatcher} = useAnalytics();
+    const analytics = useAnalytics();
 
     return React.useCallback(
         fn === undefined
-            ? () => dispatcher.dispatch(eventName)
+            ? () => analytics.dispatcher.dispatch(eventName)
             : (...args) => {
                   const result = fn(...args);
-                  dispatcher.dispatch(eventName);
+                  analytics.dispatcher.dispatch(eventName);
                   return result;
               },
-        [fn, eventName, dispatcher.dispatch],
+        [fn, eventName, analytics],
     );
 }
