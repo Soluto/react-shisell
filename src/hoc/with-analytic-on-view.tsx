@@ -1,5 +1,4 @@
-import * as React from 'react';
-import {Component, FunctionComponent, ReactType} from 'react';
+import React, {Component, ElementType, FunctionComponent} from 'react';
 import {ShisellContext} from '../shisell-context';
 import {wrapDisplayName} from '../wrapDisplayName';
 import {WithAnalyticsProps} from './with-analytics';
@@ -52,10 +51,10 @@ export const withAnalyticOnView = <TProps extends object>({
     predicate = defaultPredicate,
     mapPropsToExtras = defaultPropsToExtrasMapper,
     mapPropsToIdentities = defaultPropsToIdentitiesMapper,
-}: WithAnalyticOnViewConfiguration<TProps>) => (BaseComponent: ReactType<TProps>) => {
-    const EnhancedComponent: FunctionComponent<TProps> = props => (
+}: WithAnalyticOnViewConfiguration<TProps>) => (BaseComponent: ElementType<TProps>) => {
+    const EnhancedComponent: FunctionComponent<TProps> = (props) => (
         <ShisellContext.Consumer>
-            {analytics => (
+            {(analytics) => (
                 <AnalyticOnView
                     analytics={analytics}
                     predicate={() => predicate(props)}

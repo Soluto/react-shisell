@@ -1,5 +1,5 @@
-import * as React from 'react';
-import * as renderer from 'react-test-renderer';
+import React from 'react';
+import renderer from 'react-test-renderer';
 import {ShisellContext} from '../shisell-context';
 import {withAnalytics} from './with-analytics';
 

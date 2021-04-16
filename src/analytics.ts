@@ -1,20 +1,16 @@
-import * as shisell from 'shisell';
+import {AnalyticsDispatcher, createRootDispatcher, EventModelWriter} from 'shisell';
 
-let customWriter: shisell.EventModelWriter<void> = () => {};
-let analyticsDispatcher: shisell.AnalyticsDispatcher<void> = shisell.createRootDispatcher(eventModel =>
-    customWriter(eventModel),
-);
+let customWriter: EventModelWriter<void> = () => {};
+let analyticsDispatcher: AnalyticsDispatcher<void> = createRootDispatcher((eventModel) => customWriter(eventModel));
 
 export default {
     get dispatcher() {
         return analyticsDispatcher;
     },
-    transformDispatcher(
-        dispatcherTransformFunc: (dispatcher: shisell.AnalyticsDispatcher<void>) => shisell.AnalyticsDispatcher<void>,
-    ) {
+    transformDispatcher(dispatcherTransformFunc: (dispatcher: AnalyticsDispatcher<void>) => AnalyticsDispatcher<void>) {
         analyticsDispatcher = dispatcherTransformFunc(analyticsDispatcher);
     },
-    setWriter(func: shisell.EventModelWriter<void>) {
+    setWriter(func: EventModelWriter<void>) {
         customWriter = func;
     },
 };

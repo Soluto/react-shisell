@@ -1,8 +1,7 @@
-import * as React from 'react';
-import * as renderer from 'react-test-renderer';
+import React, {FunctionComponent} from 'react';
+import renderer from 'react-test-renderer';
 import {Analytics, ShisellContext} from '../shisell-context';
 import {useAnalytics} from './use-analytics';
-import {FunctionComponent} from 'react';
 
 describe('useAnalytics', () => {
     const ANALYTICS: any = 'some analytics';

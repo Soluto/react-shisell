@@ -1,5 +1,5 @@
-import * as React from 'react';
-import * as renderer from 'react-test-renderer';
+import React from 'react';
+import renderer from 'react-test-renderer';
 import Analytics from '../analytics';
 import {runImmediate} from '../testUtils';
 import {withAnalyticOnView} from './with-analytic-on-view';

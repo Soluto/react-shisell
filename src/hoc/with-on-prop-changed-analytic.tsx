@@ -1,5 +1,4 @@
-import * as React from 'react';
-import {Component, FunctionComponent, ReactType} from 'react';
+import React, {Component, ElementType, FunctionComponent} from 'react';
 import {wrapDisplayName} from '../wrapDisplayName';
 import {ShisellContext} from '../shisell-context';
 import {WithAnalyticsProps} from './with-analytics';
@@ -53,10 +52,10 @@ export const withOnPropChangedAnalytic = <TProps extends {}>({
     valueFilter = defaultValueFilter,
     mapPropsToExtras = defaultMapPropsToExtras,
     includeFirstValue = false,
-}: WithOnPropsChangedConfiguration<TProps>) => (BaseComponent: ReactType<TProps>) => {
-    const EnhancedComponent: FunctionComponent<TProps> = props => (
+}: WithOnPropsChangedConfiguration<TProps>) => (BaseComponent: ElementType<TProps>) => {
+    const EnhancedComponent: FunctionComponent<TProps> = (props) => (
         <ShisellContext.Consumer>
-            {analytics => (
+            {(analytics) => (
                 <OnPropChangedAnalytic
                     analytics={analytics}
                     analyticName={analyticName}

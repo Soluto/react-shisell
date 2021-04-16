@@ -1,5 +1,4 @@
-import * as React from 'react';
-import {createContext, Context} from 'react';
+import {createContext} from 'react';
 import {AnalyticsDispatcher} from 'shisell';
 import analytics from './analytics';
 

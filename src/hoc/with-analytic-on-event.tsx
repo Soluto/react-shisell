@@ -1,5 +1,4 @@
-import * as React from 'react';
-import {Component, FunctionComponent, ReactElement, ReactType, SyntheticEvent} from 'react';
+import React, {Component, ElementType, FunctionComponent, ReactElement, SyntheticEvent} from 'react';
 import {wrapDisplayName} from '../wrapDisplayName';
 import {ShisellContext} from '../shisell-context';
 import {WithAnalyticsProps} from './with-analytics';
@@ -90,7 +89,7 @@ export const withAnalyticOnEvent = <Props extends {}, Event extends object = Syn
     analyticName,
     extras,
     identities,
-}: WithAnalyticOnEventConfiguration<Props, Event>) => (BaseComponent: ReactType<Props>) => {
+}: WithAnalyticOnEventConfiguration<Props, Event>) => (BaseComponent: ElementType<Props>) => {
     type CombinedProps = Props & WithAnalyticOnEventProps<Event>;
 
     const EnhancedComponent: FunctionComponent<CombinedProps> = ({

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import {Component, FunctionComponent} from 'react';
 import * as PropTypes from 'prop-types';
 import {AnalyticsDispatcher} from 'shisell';
@@ -30,7 +30,7 @@ export const AnalyticsProvider: FunctionComponent<AnalyticsProviderProps> = ({di
     if (typeof dispatcher === 'function') {
         return (
             <ShisellContext.Consumer>
-                {analytics => (
+                {(analytics) => (
                     <LazyAnalyticsProvider getDispatcher={() => dispatcher(analytics.dispatcher)}>
                         {children}
                     </LazyAnalyticsProvider>

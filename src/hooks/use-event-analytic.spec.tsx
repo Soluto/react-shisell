@@ -1,5 +1,5 @@
-import * as React from 'react';
-import * as renderer from 'react-test-renderer';
+import React from 'react';
+import renderer from 'react-test-renderer';
 import Analytics from '../analytics';
 import {useEventAnalytic} from './use-event-analytic';
 import {ShisellContext} from '../shisell-context';

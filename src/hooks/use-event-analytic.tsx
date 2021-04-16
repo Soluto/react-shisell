@@ -1,17 +1,14 @@
-import {useCallback} from 'react';
-import {verifyHooksExist} from './verify-hooks-exist';
+import {EventHandler, SyntheticEvent, useCallback} from 'react';
 import {AnalyticsDispatcher} from 'shisell';
 import {useAnalytics} from './use-analytics';
 
-export function useEventAnalytic<EventType extends React.SyntheticEvent>(
+export function useEventAnalytic<EventType extends SyntheticEvent>(
     dispatch: (dispatcher: AnalyticsDispatcher<void>) => void,
-    eventHandler?: React.EventHandler<EventType> | null,
+    eventHandler?: EventHandler<EventType> | null,
     deps: ReadonlyArray<any> = [],
 ) {
-    verifyHooksExist('withAnalyticOnEvent');
-
     const analytics = useAnalytics();
-    const handlerWithAnalytics = useCallback(
+    return useCallback(
         (event: EventType) => {
             dispatch(analytics.dispatcher);
 
@@ -21,6 +18,4 @@ export function useEventAnalytic<EventType extends React.SyntheticEvent>(
         },
         [analytics, ...deps],
     );
-
-    return handlerWithAnalytics;
 }
