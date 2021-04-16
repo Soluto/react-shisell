@@ -3,6 +3,7 @@ import {Component, FunctionComponent, ReactType} from 'react';
 import {ShisellContext} from '../shisell-context';
 import {wrapDisplayName} from '../wrapDisplayName';
 import {WithAnalyticsProps} from './with-analytics';
+import {withExtras, withIdentities} from 'shisell/extenders';
 
 export interface WithAnalyticOnViewConfiguration<T> {
     analyticName: string;
@@ -29,10 +30,7 @@ class AnalyticOnView extends Component<AnalyticOnViewProps> {
         const {predicate, getExtraData, analyticName, analytics, getIdentities} = this.props;
         if (this.didSendAnalytic || !predicate()) return;
 
-        analytics.dispatcher
-            .withExtras(getExtraData())
-            .withIdentities(getIdentities())
-            .dispatch(analyticName);
+        analytics.dispatcher.extend(withExtras(getExtraData()), withIdentities(getIdentities())).dispatch(analyticName);
         this.didSendAnalytic = true;
     }
 
