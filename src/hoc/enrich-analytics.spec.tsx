@@ -5,17 +5,13 @@ import {runImmediate} from '../testUtils';
 import {ShisellContext} from '../shisell-context';
 import {enrichAnalytics} from './enrich-analytics';
 import {createScoped} from 'shisell/extenders';
+import {useContext} from 'react';
 
-class AnalyticsSender extends React.Component {
-    static contextType = ShisellContext;
-
-    render() {
-        this.context.dispatcher.dispatch('TestAnalytic');
-        return null;
-    }
-}
-
-const identity = <T extends object>(f: T) => f;
+const AnalyticsSender = () => {
+    const analytics = useContext(ShisellContext);
+    analytics.dispatcher.dispatch('TestAnalytic');
+    return null;
+};
 
 describe('enrichAnalytics', () => {
     const writer = jest.fn();
@@ -25,18 +21,20 @@ describe('enrichAnalytics', () => {
     });
 
     it('Applies transformation to dispatchers below in context', async () => {
-        const EnhancedComponent = enrichAnalytics(dispatcher => dispatcher.extend(createScoped('Rawr')))(
+        const EnhancedComponent = enrichAnalytics((dispatcher) => dispatcher.extend(createScoped('Rawr')))(
             AnalyticsSender,
         );
 
-        const result = renderer.create(<EnhancedComponent />);
+        renderer.create(<EnhancedComponent />);
 
         await runImmediate();
 
         expect(writer).toHaveBeenCalledTimes(1);
-        expect(writer.mock.calls[0][0]).toMatchObject({
-            Name: 'TestAnalytic',
-            Scope: 'Rawr',
-        });
+        expect(writer).toHaveBeenCalledWith(
+            expect.objectContaining({
+                Name: 'TestAnalytic',
+                Scope: 'Rawr',
+            }),
+        );
     });
 });

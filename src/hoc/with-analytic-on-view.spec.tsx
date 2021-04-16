@@ -17,23 +17,22 @@ describe('withAnalyticOnMount', () => {
             analyticName: 'TestAnalytic',
         })(Empty);
 
-        const result = renderer.create(<EnhancedComponent />);
+        renderer.create(<EnhancedComponent />);
 
         await runImmediate();
 
         expect(writer).toHaveBeenCalledTimes(1);
-        expect(writer.mock.calls[0][0]).toMatchObject({
-            Name: 'TestAnalytic',
-        });
+        expect(writer).toHaveBeenCalledWith(
+            expect.objectContaining({
+                Name: 'TestAnalytic',
+            }),
+        );
     });
 
     it('Sends the analytic only after predicate is true', async () => {
         const EnhancedComponent = withAnalyticOnView({
             analyticName: 'TestAnalytic',
-            predicate: jest
-                .fn()
-                .mockReturnValueOnce(false)
-                .mockReturnValueOnce(true),
+            predicate: jest.fn().mockReturnValueOnce(false).mockReturnValueOnce(true),
         })(Empty);
 
         const result = renderer.create(<EnhancedComponent />);
@@ -43,9 +42,11 @@ describe('withAnalyticOnMount', () => {
         result.update(<EnhancedComponent />);
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
-        expect(writer.mock.calls[0][0]).toMatchObject({
-            Name: 'TestAnalytic',
-        });
+        expect(writer).toHaveBeenCalledWith(
+            expect.objectContaining({
+                Name: 'TestAnalytic',
+            }),
+        );
     });
 
     it('Sends the analytic with identities', async () => {
@@ -57,9 +58,11 @@ describe('withAnalyticOnMount', () => {
         renderer.create(<EnhancedComponent />);
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
-        expect(writer.mock.calls[0][0]).toMatchObject({
-            Name: 'TestAnalytic',
-            Identities: {sessionId: 'a1b2c3', deviceId: 'd4e5f6'},
-        });
+        expect(writer).toHaveBeenCalledWith(
+            expect.objectContaining({
+                Name: 'TestAnalytic',
+                Identities: {sessionId: 'a1b2c3', deviceId: 'd4e5f6'},
+            }),
+        );
     });
 });

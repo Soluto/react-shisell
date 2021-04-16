@@ -1,9 +1,7 @@
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
 import Analytics from '../analytics';
-import {runImmediate} from '../testUtils';
 import {useEventAnalytic} from './use-event-analytic';
-import analytics from '../analytics';
 import {ShisellContext} from '../shisell-context';
 
 describe('withAnalyticOnEvent', () => {
@@ -49,7 +47,7 @@ describe('withAnalyticOnEvent', () => {
         };
 
         const dom = renderer.create(
-            <ShisellContext.Provider value={{dispatcher: shisellDispatcher}}>
+            <ShisellContext.Provider value={{dispatcher: shisellDispatcher as any}}>
                 <TestComponent />
             </ShisellContext.Provider>,
         );
@@ -75,7 +73,7 @@ describe('withAnalyticOnEvent', () => {
         const onClick3 = dom.root.findByType('span').props.onClick;
 
         dom.update(
-            <ShisellContext.Provider value={{dispatcher: jest.fn()}}>
+            <ShisellContext.Provider value={{dispatcher: jest.fn() as any}}>
                 <TestComponent value={2} />
             </ShisellContext.Provider>,
         );

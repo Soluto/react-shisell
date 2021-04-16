@@ -33,9 +33,11 @@ describe('withOnPropChangedAnalytic', () => {
         result.update(<EnhancedComponent prop1={2} />);
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
-        expect(writer.mock.calls[0][0]).toMatchObject({
-            Name: 'TestAnalytic',
-        });
+        expect(writer).toHaveBeenCalledWith(
+            expect.objectContaining({
+                Name: 'TestAnalytic',
+            }),
+        );
     });
 
     it("Don't send an analytic when the selected prop does not change value", async () => {
@@ -49,7 +51,7 @@ describe('withOnPropChangedAnalytic', () => {
 
         result.update(<EnhancedComponent prop1={1} />);
         await runImmediate();
-        expect(writer).toHaveBeenCalledTimes(0);
+        expect(writer).not.toHaveBeenCalled();
     });
 
     it('Respects change predicate returning false when deciding if to send analytics', async () => {
@@ -65,7 +67,7 @@ describe('withOnPropChangedAnalytic', () => {
 
         result.update(<EnhancedComponent prop1={2} />);
         await runImmediate();
-        expect(writer).toHaveBeenCalledTimes(0);
+        expect(writer).not.toHaveBeenCalled();
     });
 
     it('Sends an analytic when component mounts if includeFirstValue set to true and prop meets filter', async () => {
@@ -76,7 +78,7 @@ describe('withOnPropChangedAnalytic', () => {
             valueFilter: (a, b) => b,
         })(Empty);
 
-        const result = renderer.create(<EnhancedComponent prop1={1} />);
+        renderer.create(<EnhancedComponent prop1={1} />);
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
     });
@@ -89,9 +91,9 @@ describe('withOnPropChangedAnalytic', () => {
             valueFilter: (a, b) => b,
         })(Empty);
 
-        const result = renderer.create(<EnhancedComponent />);
+        renderer.create(<EnhancedComponent />);
         await runImmediate();
-        expect(writer).toHaveBeenCalledTimes(0);
+        expect(writer).not.toHaveBeenCalled();
     });
 
     it('Sends an analytic when component mounts if includeFirstValue set to true and valueFilter not provided', async () => {
@@ -101,7 +103,7 @@ describe('withOnPropChangedAnalytic', () => {
             includeFirstValue: true,
         })(Empty);
 
-        const result = renderer.create(<EnhancedComponent />);
+        renderer.create(<EnhancedComponent />);
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
     });

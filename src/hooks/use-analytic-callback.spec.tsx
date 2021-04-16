@@ -21,7 +21,7 @@ describe('useAnalyticCallback', () => {
 
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
-        expect(writer.mock.calls[0][0]).toMatchObject({Name: 'eventName'});
+        expect(writer).toHaveBeenCalledWith(expect.objectContaining({Name: 'eventName'}));
     });
 
     it('Wraps the given function to dispatch an analytic when called', async () => {
@@ -40,6 +40,6 @@ describe('useAnalyticCallback', () => {
         expect(testFn).toHaveBeenCalledTimes(1);
         expect(result).toEqual('test');
         expect(writer).toHaveBeenCalledTimes(1);
-        expect(writer.mock.calls[0][0]).toMatchObject({Name: 'eventName'});
+        expect(writer).toHaveBeenCalledWith(expect.objectContaining({Name: 'eventName'}));
     });
 });

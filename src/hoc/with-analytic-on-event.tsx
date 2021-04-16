@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {Component, FunctionComponent, ReactElement, ReactType, SyntheticEvent} from 'react';
-import * as PropTypes from 'prop-types';
 import {wrapDisplayName} from '../wrapDisplayName';
 import {ShisellContext} from '../shisell-context';
 import {WithAnalyticsProps} from './with-analytics';
@@ -27,24 +26,13 @@ export interface WithAnalyticOnEventProps<Event> {
     shouldDispatchAnalytics?: boolean | Predicate<Event>;
 }
 
-const dataMapperPropType = PropTypes.oneOfType([PropTypes.object.isRequired, PropTypes.func.isRequired]);
-
-const withAnalyticOnEventDefaultProps = {
-    shouldDispatchAnalytics: true,
-};
-const withAnalyticOnEventPropTypes = {
-    analyticsExtras: dataMapperPropType,
-    analyticsIdentities: dataMapperPropType,
-    shouldDispatchAnalytics: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
-};
-
 const getPossibleFunctionValue = <Event, Value>(e: Event, f: ((e: Event) => Value) | Value | undefined) =>
     typeof f === 'function' ? (f as Function)(e) : f;
 const isBoolean = (val: any) => typeof val === 'boolean';
 
 type AnalyticOnEventProps = WithAnalyticsProps & {
     children: (event: Function) => ReactElement;
-    event: Function;
+    event?: Function;
     eventName: string;
     analyticName: string;
     analyticsExtras?: DataMapper<any>;
@@ -86,7 +74,7 @@ class AnalyticOnEvent extends Component<AnalyticOnEventProps> {
         }
 
         if (typeof event === 'function') {
-            (event as Function)(e);
+            event(e);
         } else if (process.env.NODE_ENV !== 'prodution' && event) {
             console.warn(`Expected function as an "${eventName}" prop in ${displayName}, instead got ${typeof event}`);
         }
@@ -111,12 +99,12 @@ export const withAnalyticOnEvent = <Props extends {}, Event extends object = Syn
         analyticsIdentities,
         shouldDispatchAnalytics,
         ...props
-    }: any) => (
+    }) => (
         <ShisellContext.Consumer>
-            {analytics => (
+            {(analytics) => (
                 <AnalyticOnEvent
                     analytics={analytics}
-                    event={rawEvent}
+                    event={(rawEvent as unknown) as Function}
                     eventName={eventName as string}
                     analyticName={analyticName}
                     analyticsExtras={analyticsExtras}
@@ -126,7 +114,7 @@ export const withAnalyticOnEvent = <Props extends {}, Event extends object = Syn
                     staticIdentities={identities}
                     displayName={EnhancedComponent.displayName!}
                 >
-                    {event => {
+                    {(event) => {
                         // @ts-ignore
                         return <BaseComponent {...{[eventName]: event}} {...props} />;
                     }}
