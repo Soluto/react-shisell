@@ -1,5 +1,6 @@
 import {render} from '@testing-library/react';
 import React from 'react';
+import {withIdentities} from 'shisell/extenders';
 import Analytics from '../analytics';
 import {runImmediate} from '../testUtils';
 import {withAnalyticOnView} from './with-analytic-on-view';
@@ -32,15 +33,17 @@ describe('withAnalyticOnMount', () => {
     it('Sends the analytic only after predicate is true', async () => {
         const EnhancedComponent = withAnalyticOnView({
             analyticName: 'TestAnalytic',
-            predicate: jest.fn().mockReturnValueOnce(false).mockReturnValueOnce(true),
+            shouldDispatchAnalytics: jest.fn().mockReturnValueOnce(false).mockReturnValueOnce(true),
         })(Empty);
 
         const {rerender} = render(<EnhancedComponent />);
         await runImmediate();
+
         expect(writer).toHaveBeenCalledTimes(0);
 
         rerender(<EnhancedComponent />);
         await runImmediate();
+
         expect(writer).toHaveBeenCalledTimes(1);
         expect(writer).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -52,7 +55,7 @@ describe('withAnalyticOnMount', () => {
     it('Sends the analytic with identities', async () => {
         const EnhancedComponent = withAnalyticOnView({
             analyticName: 'TestAnalytic',
-            mapPropsToIdentities: () => ({sessionId: 'a1b2c3', deviceId: 'd4e5f6'}),
+            extendAnalytics: () => withIdentities({sessionId: 'a1b2c3', deviceId: 'd4e5f6'}),
         })(Empty);
 
         render(<EnhancedComponent />);
