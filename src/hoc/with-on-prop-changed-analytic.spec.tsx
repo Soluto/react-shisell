@@ -7,7 +7,7 @@ import {withOnPropChangedAnalytic} from './with-on-prop-changed-analytic';
 interface Props {
     prop1?: number;
 }
-const Empty = (props: Props) => null;
+const Empty = (_: Props) => null;
 const falseProvider = () => false;
 
 describe('withOnPropChangedAnalytic', () => {
@@ -75,7 +75,7 @@ describe('withOnPropChangedAnalytic', () => {
             propName: 'prop1',
             analyticName: 'TestAnalytic',
             includeFirstValue: true,
-            valueFilter: (a, b) => b,
+            valueFilter: (_, b) => b,
         })(Empty);
 
         renderer.create(<EnhancedComponent prop1={1} />);
@@ -88,7 +88,7 @@ describe('withOnPropChangedAnalytic', () => {
             propName: 'prop1',
             analyticName: 'TestAnalytic',
             includeFirstValue: true,
-            valueFilter: (a, b) => b,
+            valueFilter: (_, b) => b,
         })(Empty);
 
         renderer.create(<EnhancedComponent />);
