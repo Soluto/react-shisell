@@ -1,4 +1,4 @@
-import React, {Component, ElementType, FunctionComponent, ReactElement, SyntheticEvent} from 'react';
+import React, {Component, ElementType, FunctionComponent, ReactElement} from 'react';
 import {wrapDisplayName} from '../wrapDisplayName';
 import {ShisellContext} from '../shisell-context';
 import {WithAnalyticsProps} from './with-analytics';
@@ -12,8 +12,8 @@ type DataMapper<Event> = {} | ExtraAnalyticsDataProvider<Event>;
 
 type Predicate<T> = (val: T) => boolean;
 
-export interface WithAnalyticOnEventConfiguration<TProps, TEvent> {
-    eventName: keyof TProps;
+export interface WithAnalyticOnEventConfiguration<TEventName extends string, TEvent> {
+    eventName: TEventName;
     analyticName: string;
     extras?: DataMapper<TEvent>;
     identities?: DataMapper<TEvent>;
@@ -24,6 +24,8 @@ export interface WithAnalyticOnEventProps<Event> {
     analyticsIdentities?: DataMapper<Event>;
     shouldDispatchAnalytics?: boolean | Predicate<Event>;
 }
+
+export type EventProp<EventName extends string, Event> = Record<EventName, undefined | ((e: Event) => void)>;
 
 const getPossibleFunctionValue = <Event, Value>(e: Event, f: ((e: Event) => Value) | Value | undefined) =>
     typeof f === 'function' ? (f as Function)(e) : f;
@@ -84,13 +86,21 @@ class AnalyticOnEvent extends Component<AnalyticOnEventProps> {
     }
 }
 
-export const withAnalyticOnEvent = <Props extends {}, Event extends object = SyntheticEvent<any>>({
+export const withAnalyticOnEvent = <EventName extends string, Event = any>({
     eventName,
     analyticName,
     extras,
     identities,
-}: WithAnalyticOnEventConfiguration<Props, Event>) => (BaseComponent: ElementType<Props>) => {
-    type CombinedProps = Props & WithAnalyticOnEventProps<Event>;
+}: WithAnalyticOnEventConfiguration<EventName, Event>) => <
+    Props extends EventProp<EventName, Event> = EventProp<EventName, Event>
+>(
+    BaseComponent: ElementType<Props>,
+) => {
+    type ResolvedEvent = Props[EventName] extends Function ? Parameters<Props[EventName]>[0] : Event;
+
+    type CombinedProps = Omit<Props, EventName> &
+        Partial<Record<EventName, Props[EventName]>> &
+        WithAnalyticOnEventProps<ResolvedEvent>;
 
     const EnhancedComponent: FunctionComponent<CombinedProps> = ({
         [eventName]: rawEvent,
@@ -103,7 +113,7 @@ export const withAnalyticOnEvent = <Props extends {}, Event extends object = Syn
             {(analytics) => (
                 <AnalyticOnEvent
                     analytics={analytics}
-                    event={(rawEvent as unknown) as Function}
+                    event={rawEvent as Function}
                     eventName={eventName as string}
                     analyticName={analyticName}
                     analyticsExtras={analyticsExtras}
@@ -113,10 +123,10 @@ export const withAnalyticOnEvent = <Props extends {}, Event extends object = Syn
                     staticIdentities={identities}
                     displayName={EnhancedComponent.displayName!}
                 >
-                    {(event) => {
+                    {(event) => (
                         // @ts-ignore
-                        return <BaseComponent {...{[eventName]: event}} {...props} />;
-                    }}
+                        <BaseComponent {...{[eventName]: event}} {...props} />
+                    )}
                 </AnalyticOnEvent>
             )}
         </ShisellContext.Consumer>

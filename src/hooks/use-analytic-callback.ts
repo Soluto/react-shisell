@@ -1,14 +1,9 @@
 import {useCallback} from 'react';
 import {useAnalytics} from './use-analytics';
 
-type AnyFn = (...args: any[]) => any;
-
 export function useAnalyticCallback(eventName: string): () => void;
-export function useAnalyticCallback<T extends AnyFn>(
-    eventName: string,
-    fn: T,
-): (...args: Parameters<T>) => ReturnType<T>;
-export function useAnalyticCallback(eventName: string, fn?: AnyFn): AnyFn {
+export function useAnalyticCallback<T extends Function>(eventName: string, fn: T): T;
+export function useAnalyticCallback(eventName: string, fn?: Function): Function {
     const analytics = useAnalytics();
 
     return useCallback(

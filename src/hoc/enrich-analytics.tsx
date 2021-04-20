@@ -5,8 +5,8 @@ import {AnalyticsProvider} from '../analytics-provider';
 
 type TransformAnalyticsFunc<T> = (dispatcher: AnalyticsDispatcher<void>, props: T) => AnalyticsDispatcher<void>;
 
-export function enrichAnalytics<Props>(transformAnalyticsFunc: TransformAnalyticsFunc<Props>) {
-    return (BaseComponent: ComponentType<Props>) => {
+export function enrichAnalytics<BaseProps = {}>(transformAnalyticsFunc: TransformAnalyticsFunc<BaseProps>) {
+    return <Props extends BaseProps>(BaseComponent: ComponentType<Props>) => {
         const EnhancedComponent: FunctionComponent<Props> = (props) => (
             <AnalyticsProvider dispatcher={(dispatcher) => transformAnalyticsFunc(dispatcher, props)}>
                 <BaseComponent {...props} />

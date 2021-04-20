@@ -1,27 +1,26 @@
-import React from 'react';
+import React, {FunctionComponent} from 'react';
 import renderer from 'react-test-renderer';
 import Analytics from '../analytics';
 import {runImmediate} from '../testUtils';
 import {withAnalyticOnEvent} from './with-analytic-on-event';
 
-type Props = {onClick?: Function};
-type Event = {source: string; user: string};
-
 describe('withAnalyticOnEvent', () => {
     const writer = jest.fn();
-    const BaseComponent = jest.fn((props) => {
-        props.onClick({
-            source: 'MyBaseComponent',
-            user: 'McCree',
-        });
-        return null;
-    });
+    const BaseComponent: FunctionComponent<{onClick: (e: {source: string; user: string}) => void}> = jest.fn(
+        (props) => {
+            props.onClick({
+                source: 'MyBaseComponent',
+                user: 'McCree',
+            });
+            return null;
+        },
+    );
 
     beforeAll(() => Analytics.setWriter(writer));
     beforeEach(() => writer.mockReset());
 
     it('Analytic sent when event handler is triggered', async () => {
-        const EnhancedComponent = withAnalyticOnEvent<Props>({
+        const EnhancedComponent = withAnalyticOnEvent({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
         })(BaseComponent);
@@ -39,7 +38,7 @@ describe('withAnalyticOnEvent', () => {
     });
 
     it('Analytic not sent when shouldDispatchAnalytics returns false', async () => {
-        const EnhancedComponent = withAnalyticOnEvent<Props>({
+        const EnhancedComponent = withAnalyticOnEvent({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
         })(BaseComponent);
@@ -53,7 +52,7 @@ describe('withAnalyticOnEvent', () => {
 
     it('Sends analytic when triggered and calls inner event handler', async () => {
         const eventHandler = jest.fn();
-        const EnhancedComponent = withAnalyticOnEvent<Props>({
+        const EnhancedComponent = withAnalyticOnEvent({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
         })(BaseComponent);
@@ -73,7 +72,7 @@ describe('withAnalyticOnEvent', () => {
     });
 
     it('Analytic sent with extra data from analyticsExtras as an object', async () => {
-        const EnhancedComponent = withAnalyticOnEvent<Props>({
+        const EnhancedComponent = withAnalyticOnEvent({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
         })(BaseComponent);
@@ -94,7 +93,7 @@ describe('withAnalyticOnEvent', () => {
     });
 
     it('Analytic sent with extra data from analyticsExtras as a function with data from event', async () => {
-        const EnhancedComponent = withAnalyticOnEvent<Props, Event>({
+        const EnhancedComponent = withAnalyticOnEvent({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
         })(BaseComponent);
@@ -115,7 +114,7 @@ describe('withAnalyticOnEvent', () => {
     });
 
     it('Analytic sent with identities from analyticsIdentities as an object', async () => {
-        const EnhancedComponent = withAnalyticOnEvent<Props>({
+        const EnhancedComponent = withAnalyticOnEvent({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
         })(BaseComponent);
@@ -136,7 +135,7 @@ describe('withAnalyticOnEvent', () => {
     });
 
     it('Analytic sent with identities from analyticsIdentities as a function with data from event', async () => {
-        const EnhancedComponent = withAnalyticOnEvent<Props, Event>({
+        const EnhancedComponent = withAnalyticOnEvent({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
         })(BaseComponent);
@@ -157,7 +156,7 @@ describe('withAnalyticOnEvent', () => {
     });
 
     it('Analytic sent with static identities', async () => {
-        const EnhancedComponent = withAnalyticOnEvent<Props>({
+        const EnhancedComponent = withAnalyticOnEvent({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
             identities: {
@@ -180,7 +179,7 @@ describe('withAnalyticOnEvent', () => {
     });
 
     it('Analytic sent with static extras', async () => {
-        const EnhancedComponent = withAnalyticOnEvent<Props>({
+        const EnhancedComponent = withAnalyticOnEvent({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
             extras: {
@@ -204,7 +203,7 @@ describe('withAnalyticOnEvent', () => {
     });
 
     it('Correctly ignores nulls in extras/identities', async () => {
-        const EnhancedComponent = withAnalyticOnEvent<Props>({
+        const EnhancedComponent = withAnalyticOnEvent({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
             // @ts-expect-error

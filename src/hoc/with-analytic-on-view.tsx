@@ -46,12 +46,12 @@ class AnalyticOnView extends Component<AnalyticOnViewProps> {
     }
 }
 
-export const withAnalyticOnView = <TProps extends object>({
+export const withAnalyticOnView = <BaseProps extends {} = {}>({
     analyticName,
     predicate = defaultPredicate,
     mapPropsToExtras = defaultPropsToExtrasMapper,
     mapPropsToIdentities = defaultPropsToIdentitiesMapper,
-}: WithAnalyticOnViewConfiguration<TProps>) => (BaseComponent: ElementType<TProps>) => {
+}: WithAnalyticOnViewConfiguration<BaseProps>) => <TProps extends BaseProps>(BaseComponent: ElementType<TProps>) => {
     const EnhancedComponent: FunctionComponent<TProps> = (props) => (
         <ShisellContext.Consumer>
             {(analytics) => (

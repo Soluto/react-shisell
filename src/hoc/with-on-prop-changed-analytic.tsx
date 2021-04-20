@@ -46,13 +46,13 @@ class OnPropChangedAnalytic extends Component<OnPropChangedAnalyticProps> {
     }
 }
 
-export const withOnPropChangedAnalytic = <TProps extends {}>({
+export const withOnPropChangedAnalytic = <BaseProps extends {} = {}>({
     propName,
     analyticName,
     valueFilter = defaultValueFilter,
     mapPropsToExtras = defaultMapPropsToExtras,
     includeFirstValue = false,
-}: WithOnPropsChangedConfiguration<TProps>) => (BaseComponent: ElementType<TProps>) => {
+}: WithOnPropsChangedConfiguration<BaseProps>) => <TProps extends BaseProps>(BaseComponent: ElementType<TProps>) => {
     const EnhancedComponent: FunctionComponent<TProps> = (props) => (
         <ShisellContext.Consumer>
             {(analytics) => (
