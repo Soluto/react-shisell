@@ -65,7 +65,7 @@ export const withAnalyticOnEvent = <
 
                 if (typeof rawEvent === 'function') {
                     return rawEvent(...args);
-                } else if (process.env.NODE_ENV !== 'prodution' && rawEvent) {
+                } else if (process.env.NODE_ENV !== 'production' && rawEvent) {
                     console.warn(
                         `Expected function as an "${eventName}" prop in ${EnhancedComponent.displayName!}, instead got ${typeof rawEvent}`,
                     );
