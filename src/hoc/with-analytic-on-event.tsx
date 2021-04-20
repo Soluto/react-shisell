@@ -48,8 +48,9 @@ export const withAnalyticOnEvent = <
         const onEvent = useCallback(
             (...args: Parameters<Props[EventName]>) => {
                 const shouldDispatch =
-                    shouldDispatchAnalytics !== false &&
-                    (typeof shouldDispatchAnalytics !== 'function' || shouldDispatchAnalytics(...args));
+                    typeof shouldDispatchAnalytics === 'function'
+                        ? shouldDispatchAnalytics(...args)
+                        : shouldDispatchAnalytics == null || shouldDispatchAnalytics;
 
                 if (shouldDispatch) {
                     let {dispatcher} = analytics;
