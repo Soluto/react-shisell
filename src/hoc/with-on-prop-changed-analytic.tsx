@@ -1,79 +1,64 @@
-import React, {Component, ElementType, FunctionComponent} from 'react';
+import React, {ElementType, FunctionComponent, useEffect, useRef} from 'react';
+import {useAnalytics} from '../hooks/use-analytics';
 import {wrapDisplayName} from '../wrapDisplayName';
-import {ShisellContext} from '../shisell-context';
-import {WithAnalyticsProps} from './with-analytics';
-import {withExtras} from 'shisell/extenders';
+import {ExtendEventAnalytics} from './with-analytic-on-event';
 
-type Predicate<T1, T2> = (val1: T1, val2: T2) => boolean;
-
-export type WithOnPropsChangedConfiguration<T> = {
-    propName: keyof T;
+export type WithOnPropsChangedConfiguration<
+    PropName extends string,
+    PropValue,
+    Props extends Record<PropName, PropValue> = Record<PropName, PropValue>
+> = {
+    propName: PropName;
     analyticName: string;
-    valueFilter?: Predicate<any, any>;
-    mapPropsToExtras?: (props: T) => {};
+    valueFilter?: (val1: PropValue | undefined, val2: PropValue) => boolean;
     includeFirstValue?: boolean;
+    extendAnalytics?: ExtendEventAnalytics<[Props]>;
 };
 
-const defaultMapPropsToExtras = () => ({});
 const defaultValueFilter = () => true;
 
-type OnPropChangedAnalyticProps = WithAnalyticsProps & {
-    analyticName: string;
-    valueFilter: Predicate<any, any>;
-    includeFirstValue?: boolean;
-    getExtraData: () => {};
-    value: any;
-};
-
-class OnPropChangedAnalytic extends Component<OnPropChangedAnalyticProps> {
-    componentDidMount() {
-        const {includeFirstValue, valueFilter, value, analytics, getExtraData, analyticName} = this.props;
-        if (includeFirstValue && valueFilter(undefined, value)) {
-            analytics.dispatcher.extend(withExtras(getExtraData())).dispatch(analyticName);
-        }
-    }
-
-    componentDidUpdate({value: prevValue}: OnPropChangedAnalyticProps) {
-        const {value: nextValue, valueFilter, analytics, getExtraData, analyticName} = this.props;
-
-        if (prevValue !== nextValue && valueFilter(prevValue, nextValue)) {
-            analytics.dispatcher.extend(withExtras(getExtraData())).dispatch(analyticName);
-        }
-    }
-
-    render() {
-        return this.props.children;
-    }
-}
-
-export const withOnPropChangedAnalytic = <BaseProps extends {} = {}>({
+export function withOnPropChangedAnalytic<
+    PropName extends string,
+    PropValue,
+    BaseProps extends Record<PropName, PropValue> = Record<PropName, PropValue>
+>({
     propName,
     analyticName,
     valueFilter = defaultValueFilter,
-    mapPropsToExtras = defaultMapPropsToExtras,
     includeFirstValue = false,
-}: WithOnPropsChangedConfiguration<BaseProps>) => <TProps extends BaseProps>(BaseComponent: ElementType<TProps>) => {
-    const EnhancedComponent: FunctionComponent<TProps> = (props) => (
-        <ShisellContext.Consumer>
-            {(analytics) => (
-                <OnPropChangedAnalytic
-                    analytics={analytics}
-                    analyticName={analyticName}
-                    valueFilter={valueFilter}
-                    includeFirstValue={includeFirstValue}
-                    getExtraData={() => mapPropsToExtras(props)}
-                    value={props[propName]}
-                >
-                    {
-                        // @ts-ignore
-                        <BaseComponent {...props} />
+    extendAnalytics,
+}: WithOnPropsChangedConfiguration<PropName, PropValue, BaseProps>) {
+    return <Props extends BaseProps>(BaseComponent: ElementType<Props>) => {
+        const EnhancedComponent: FunctionComponent<Props> = (props) => {
+            const analytics = useAnalytics();
+
+            const value = props[propName];
+            const prevValue = useRef(value);
+
+            useEffect(() => {
+                const isFirstValue = prevValue.current === value;
+
+                if (isFirstValue && !includeFirstValue) {
+                    return;
+                }
+
+                if (valueFilter(isFirstValue ? undefined : prevValue.current, value)) {
+                    let {dispatcher} = analytics;
+                    if (extendAnalytics) {
+                        dispatcher = dispatcher.extend(extendAnalytics(props));
                     }
-                </OnPropChangedAnalytic>
-            )}
-        </ShisellContext.Consumer>
-    );
+                    dispatcher.dispatch(analyticName);
+                }
 
-    EnhancedComponent.displayName = wrapDisplayName(BaseComponent, 'withOnPropChangedAnalytic');
+                prevValue.current = value;
+            }, [value]);
 
-    return EnhancedComponent;
-};
+            // @ts-ignore
+            return <BaseComponent {...props} />;
+        };
+
+        EnhancedComponent.displayName = wrapDisplayName(BaseComponent, 'withOnPropChangedAnalytic');
+
+        return EnhancedComponent;
+    };
+}
