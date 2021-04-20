@@ -1,126 +1,82 @@
-import React, {Component, ElementType, FunctionComponent, ReactElement, SyntheticEvent} from 'react';
+import React, {ElementType, FunctionComponent, useCallback} from 'react';
+import {AnalyticsExtender} from 'shisell';
+import {useAnalytics} from '../hooks/use-analytics';
 import {wrapDisplayName} from '../wrapDisplayName';
-import {ShisellContext} from '../shisell-context';
-import {WithAnalyticsProps} from './with-analytics';
-import {withExtras, withIdentities} from 'shisell/extenders';
 
-export interface ExtraAnalyticsDataProvider<Event> {
-    (event: Event): {};
-}
+type AnyFn = (...args: any[]) => any;
 
-type DataMapper<Event> = {} | ExtraAnalyticsDataProvider<Event>;
+export type ExtendEventAnalytics<Params extends any[]> = (...params: Params) => AnalyticsExtender<void>;
 
-type Predicate<T> = (val: T) => boolean;
-
-export interface WithAnalyticOnEventConfiguration<TProps, TEvent> {
-    eventName: keyof TProps;
+export interface WithAnalyticOnEventConfiguration<
+    EventName extends string,
+    EventType extends AnyFn = () => void,
+    Props extends Record<EventName, EventType> = Record<EventName, EventType>
+> {
+    eventName: EventName;
     analyticName: string;
-    extras?: DataMapper<TEvent>;
-    identities?: DataMapper<TEvent>;
+    extendAnalytics?: ExtendEventAnalytics<[Omit<Props, EventName>, ...Parameters<EventType>]>;
 }
 
-export interface WithAnalyticOnEventProps<Event> {
-    analyticsExtras?: DataMapper<Event>;
-    analyticsIdentities?: DataMapper<Event>;
-    shouldDispatchAnalytics?: boolean | Predicate<Event>;
+export interface WithAnalyticOnEventProps<Params extends any[]> {
+    extendAnalytics?: ExtendEventAnalytics<Params>;
+    shouldDispatchAnalytics?: boolean | ((...params: Params) => boolean);
 }
 
-const getPossibleFunctionValue = <Event, Value>(e: Event, f: ((e: Event) => Value) | Value | undefined) =>
-    typeof f === 'function' ? (f as Function)(e) : f;
-const isBoolean = (val: any) => typeof val === 'boolean';
-
-type AnalyticOnEventProps = WithAnalyticsProps & {
-    children: (event: Function) => ReactElement;
-    event?: Function;
-    eventName: string;
-    analyticName: string;
-    analyticsExtras?: DataMapper<any>;
-    analyticsIdentities?: DataMapper<any>;
-    shouldDispatchAnalytics?: boolean | Predicate<any>;
-    staticExtras?: DataMapper<any>;
-    staticIdentities?: DataMapper<any>;
-    displayName: string;
-};
-
-class AnalyticOnEvent extends Component<AnalyticOnEventProps> {
-    onEvent = (e: Event) => {
-        const {
-            event,
-            eventName,
-            shouldDispatchAnalytics,
-            analyticsExtras,
-            analyticsIdentities,
-            staticExtras: rawStaticExtras,
-            staticIdentities: rawStaticIdentities,
-            analyticName,
-            analytics,
-            displayName,
-        } = this.props;
-        const shouldDispatch = getPossibleFunctionValue<Event, boolean>(e, shouldDispatchAnalytics);
-
-        if ((isBoolean(shouldDispatch) && shouldDispatch) || !isBoolean(shouldDispatch)) {
-            const propsExtras = getPossibleFunctionValue(e, analyticsExtras);
-            const propsIdentities = getPossibleFunctionValue(e, analyticsIdentities);
-            const staticExtras = getPossibleFunctionValue(e, rawStaticExtras);
-            const staticIdentities = getPossibleFunctionValue(e, rawStaticIdentities);
-
-            let {dispatcher} = analytics;
-            dispatcher = staticExtras ? dispatcher.extend(withExtras(staticExtras)) : dispatcher;
-            dispatcher = staticIdentities ? dispatcher.extend(withIdentities(staticIdentities)) : dispatcher;
-            dispatcher = propsExtras ? dispatcher.extend(withExtras(propsExtras)) : dispatcher;
-            dispatcher = propsIdentities ? dispatcher.extend(withIdentities(propsIdentities)) : dispatcher;
-            dispatcher.dispatch(analyticName);
-        }
-
-        if (typeof event === 'function') {
-            event(e);
-        } else if (process.env.NODE_ENV !== 'prodution' && event) {
-            console.warn(`Expected function as an "${eventName}" prop in ${displayName}, instead got ${typeof event}`);
-        }
-    };
-
-    render() {
-        return this.props.children(this.onEvent);
-    }
-}
-
-export const withAnalyticOnEvent = <Props extends {}, Event extends object = SyntheticEvent<any>>({
+export const withAnalyticOnEvent = <
+    EventName extends string,
+    EventType extends AnyFn,
+    BaseProps extends Record<EventName, EventType> = Record<EventName, EventType>
+>({
     eventName,
     analyticName,
-    extras,
-    identities,
-}: WithAnalyticOnEventConfiguration<Props, Event>) => (BaseComponent: ElementType<Props>) => {
-    type CombinedProps = Props & WithAnalyticOnEventProps<Event>;
+    extendAnalytics: extendAnalyticsFromConfig,
+}: WithAnalyticOnEventConfiguration<EventName, EventType, BaseProps>) => <Props extends BaseProps = BaseProps>(
+    BaseComponent: ElementType<Props>,
+) => {
+    type CombinedProps = Omit<Props, EventName> &
+        Partial<Record<EventName, Props[EventName]>> &
+        WithAnalyticOnEventProps<Parameters<Props[EventName]>>;
 
     const EnhancedComponent: FunctionComponent<CombinedProps> = ({
         [eventName]: rawEvent,
-        analyticsExtras,
-        analyticsIdentities,
+        extendAnalytics,
         shouldDispatchAnalytics,
         ...props
-    }) => (
-        <ShisellContext.Consumer>
-            {(analytics) => (
-                <AnalyticOnEvent
-                    analytics={analytics}
-                    event={(rawEvent as unknown) as Function}
-                    eventName={eventName as string}
-                    analyticName={analyticName}
-                    analyticsExtras={analyticsExtras}
-                    analyticsIdentities={analyticsIdentities}
-                    shouldDispatchAnalytics={shouldDispatchAnalytics}
-                    staticExtras={extras}
-                    staticIdentities={identities}
-                    displayName={EnhancedComponent.displayName!}
-                >
-                    {(event) => {
-                        // @ts-ignore
-                        return <BaseComponent {...{[eventName]: event}} {...props} />;
-                    }}
-                </AnalyticOnEvent>
-            )}
-        </ShisellContext.Consumer>
-    );
+    }) => {
+        const analytics = useAnalytics();
+
+        const onEvent = useCallback(
+            (...args: Parameters<Props[EventName]>) => {
+                const shouldDispatch =
+                    shouldDispatchAnalytics !== false &&
+                    (typeof shouldDispatchAnalytics !== 'function' || shouldDispatchAnalytics(...args));
+
+                if (shouldDispatch) {
+                    let {dispatcher} = analytics;
+
+                    if (extendAnalyticsFromConfig) {
+                        dispatcher = dispatcher.extend(extendAnalyticsFromConfig(props as any, ...args));
+                    }
+                    if (extendAnalytics) {
+                        dispatcher = dispatcher.extend(extendAnalytics(...args));
+                    }
+                    dispatcher.dispatch(analyticName);
+                }
+
+                if (typeof rawEvent === 'function') {
+                    return rawEvent(...args);
+                } else if (process.env.NODE_ENV !== 'prodution' && rawEvent) {
+                    console.warn(
+                        `Expected function as an "${eventName}" prop in ${EnhancedComponent.displayName!}, instead got ${typeof rawEvent}`,
+                    );
+                }
+            },
+            [analytics, rawEvent],
+        );
+
+        // @ts-ignore
+        return <BaseComponent {...{[eventName]: onEvent}} {...props} />;
+    };
 
     EnhancedComponent.displayName = wrapDisplayName(BaseComponent, 'withAnalyticOnEvent');
 
