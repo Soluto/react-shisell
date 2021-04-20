@@ -3,6 +3,7 @@ import React, {FunctionComponent} from 'react';
 import Analytics from '../analytics';
 import {runImmediate} from '../testUtils';
 import {withAnalyticOnEvent} from './with-analytic-on-event';
+import {withExtras} from 'shisell/extenders';
 
 describe('withAnalyticOnEvent', () => {
     const writer = jest.fn();
@@ -37,13 +38,26 @@ describe('withAnalyticOnEvent', () => {
         );
     });
 
-    it('Analytic not sent when shouldDispatchAnalytics returns false', async () => {
+    it('Analytic not sent when shouldDispatchAnalytics is false', async () => {
         const EnhancedComponent = withAnalyticOnEvent({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
         })(BaseComponent);
 
         render(<EnhancedComponent shouldDispatchAnalytics={false} />);
+
+        await runImmediate();
+
+        expect(writer).not.toHaveBeenCalled();
+    });
+
+    it('Analytic not sent when shouldDispatchAnalytics returns false', async () => {
+        const EnhancedComponent = withAnalyticOnEvent({
+            eventName: 'onClick',
+            analyticName: 'TestAnalytic',
+        })(BaseComponent);
+
+        render(<EnhancedComponent shouldDispatchAnalytics={() => false} />);
 
         await runImmediate();
 
@@ -71,13 +85,13 @@ describe('withAnalyticOnEvent', () => {
         expect(eventHandler).toHaveBeenCalledWith({source: 'MyBaseComponent', user: 'McCree'});
     });
 
-    it('Analytic sent with extra data from analyticsExtras as an object', async () => {
+    it('Analytic sent with extender', async () => {
         const EnhancedComponent = withAnalyticOnEvent({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
         })(BaseComponent);
 
-        render(<EnhancedComponent analyticsExtras={{Name: 'Me'}} />);
+        render(<EnhancedComponent extendAnalytics={() => withExtras({Name: 'Me'})} />);
 
         await runImmediate();
 
@@ -92,13 +106,13 @@ describe('withAnalyticOnEvent', () => {
         );
     });
 
-    it('Analytic sent with extra data from analyticsExtras as a function with data from event', async () => {
+    it('Analytic sent with data from event', async () => {
         const EnhancedComponent = withAnalyticOnEvent({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
         })(BaseComponent);
 
-        render(<EnhancedComponent analyticsExtras={(e) => ({Source: e.source})} />);
+        render(<EnhancedComponent extendAnalytics={(e) => withExtras({Source: e.source})} />);
 
         await runImmediate();
 
@@ -113,78 +127,11 @@ describe('withAnalyticOnEvent', () => {
         );
     });
 
-    it('Analytic sent with identities from analyticsIdentities as an object', async () => {
+    it('Analytic sent with static extender', async () => {
         const EnhancedComponent = withAnalyticOnEvent({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
-        })(BaseComponent);
-
-        render(<EnhancedComponent analyticsIdentities={{User: 'Me'}} />);
-
-        await runImmediate();
-
-        expect(writer).toHaveBeenCalledTimes(1);
-        expect(writer).toHaveBeenCalledWith(
-            expect.objectContaining({
-                Name: 'TestAnalytic',
-                Identities: {
-                    User: 'Me',
-                },
-            }),
-        );
-    });
-
-    it('Analytic sent with identities from analyticsIdentities as a function with data from event', async () => {
-        const EnhancedComponent = withAnalyticOnEvent({
-            eventName: 'onClick',
-            analyticName: 'TestAnalytic',
-        })(BaseComponent);
-
-        render(<EnhancedComponent analyticsIdentities={(e) => ({User: e.user})} />);
-
-        await runImmediate();
-
-        expect(writer).toHaveBeenCalledTimes(1);
-        expect(writer).toHaveBeenCalledWith(
-            expect.objectContaining({
-                Name: 'TestAnalytic',
-                Identities: {
-                    User: 'McCree',
-                },
-            }),
-        );
-    });
-
-    it('Analytic sent with static identities', async () => {
-        const EnhancedComponent = withAnalyticOnEvent({
-            eventName: 'onClick',
-            analyticName: 'TestAnalytic',
-            identities: {
-                User: 'McCree',
-            },
-        })(BaseComponent);
-
-        render(<EnhancedComponent />);
-
-        await runImmediate();
-        expect(writer).toHaveBeenCalledTimes(1);
-        expect(writer).toHaveBeenCalledWith(
-            expect.objectContaining({
-                Name: 'TestAnalytic',
-                Identities: {
-                    User: 'McCree',
-                },
-            }),
-        );
-    });
-
-    it('Analytic sent with static extras', async () => {
-        const EnhancedComponent = withAnalyticOnEvent({
-            eventName: 'onClick',
-            analyticName: 'TestAnalytic',
-            extras: {
-                Source: 'Some source',
-            },
+            extendAnalytics: (_, e) => withExtras({Source: e.source}),
         })(BaseComponent);
 
         render(<EnhancedComponent />);
@@ -196,27 +143,24 @@ describe('withAnalyticOnEvent', () => {
             expect.objectContaining({
                 Name: 'TestAnalytic',
                 ExtraData: expect.objectContaining({
-                    Source: 'Some source',
+                    Source: 'MyBaseComponent',
                 }),
             }),
         );
     });
 
-    it('Correctly ignores nulls in extras/identities', async () => {
+    it('Correctly ignores nulls in extenders', async () => {
         const EnhancedComponent = withAnalyticOnEvent({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
             // @ts-expect-error
-            extras: null,
-            identities: undefined,
+            extendAnalytics: null,
         })(BaseComponent);
 
         render(
             <EnhancedComponent
-                analyticsExtras={undefined}
                 // @ts-expect-error
-                analyticsIdentities={null}
-                shouldDispatchAnalytics={true}
+                extendAnalytics={null}
                 // @ts-expect-error
                 onClick={0}
             />,
