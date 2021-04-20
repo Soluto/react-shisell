@@ -1,23 +1,24 @@
+import {render} from '@testing-library/react';
 import React from 'react';
-import renderer from 'react-test-renderer';
 import {ShisellContext} from '../shisell-context';
-import {withAnalytics} from './with-analytics';
+import {withAnalytics, WithAnalyticsProps} from './with-analytics';
 
 describe('withAnalytics', () => {
     const ANALYTICS: any = 'some analytics';
 
-    it("Don't send an analytic when the selected prop does not change value", () => {
-        const InnerComponent = () => null;
+    it('Adds analytics to props', () => {
+        const InnerComponent = (props: WithAnalyticsProps) => {
+            expect(props).toEqual({analytics: ANALYTICS});
+            return null;
+        };
         const EnhancedComponent = withAnalytics(InnerComponent);
 
-        const result = renderer.create(
+        render(
             <ShisellContext.Provider value={ANALYTICS}>
                 <EnhancedComponent />
             </ShisellContext.Provider>,
         );
 
-        const component = result.root.findByType(InnerComponent);
-
-        expect(component.props).toEqual({analytics: ANALYTICS});
+        expect.assertions(1);
     });
 });

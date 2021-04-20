@@ -1,8 +1,8 @@
-import React from 'react';
-import renderer from 'react-test-renderer';
+import {renderHook} from '@testing-library/react-hooks';
+import React, {FunctionComponent} from 'react';
 import Analytics from '../analytics';
-import {useEventAnalytic} from './use-event-analytic';
 import {ShisellContext} from '../shisell-context';
+import {useEventAnalytic} from './use-event-analytic';
 
 describe('withAnalyticOnEvent', () => {
     const writer = jest.fn();
@@ -11,28 +11,22 @@ describe('withAnalyticOnEvent', () => {
 
     it('Dispatcher is called when event is triggered', () => {
         const dispatcher = jest.fn();
-        const TestComponent = () => {
-            const onClick = useEventAnalytic(dispatcher);
 
-            return <span onClick={onClick} />;
-        };
+        const {result} = renderHook(() => useEventAnalytic(dispatcher));
 
-        const dom = renderer.create(<TestComponent />);
-        dom.root.findByType('span').props.onClick();
+        result.current(undefined as any);
+
         expect(dispatcher).toHaveBeenCalledTimes(1);
     });
 
     it('Both dispatcher and inner event handler are called when event is triggered', () => {
         const eventHandler = jest.fn();
         const dispatcher = jest.fn();
-        const TestComponent = () => {
-            const onClick = useEventAnalytic(dispatcher, eventHandler);
 
-            return <span onClick={onClick} />;
-        };
+        const {result} = renderHook(() => useEventAnalytic(dispatcher, eventHandler));
 
-        const dom = renderer.create(<TestComponent />);
-        dom.root.findByType('span').props.onClick();
+        result.current(undefined);
+
         expect(dispatcher).toHaveBeenCalledTimes(1);
         expect(eventHandler).toHaveBeenCalledTimes(1);
     });
@@ -40,47 +34,36 @@ describe('withAnalyticOnEvent', () => {
     it('Dispatcher gets shisell dispatcher from context', () => {
         const shisellDispatcher = jest.fn();
         const dispatcher = jest.fn();
-        const TestComponent = () => {
-            const onClick = useEventAnalytic(dispatcher);
 
-            return <span onClick={onClick} />;
-        };
+        const {result} = renderHook(() => useEventAnalytic(dispatcher), {
+            wrapper: ShisellContext.Provider,
+            initialProps: {value: {dispatcher: shisellDispatcher as any}},
+        });
 
-        const dom = renderer.create(
-            <ShisellContext.Provider value={{dispatcher: shisellDispatcher as any}}>
-                <TestComponent />
-            </ShisellContext.Provider>,
-        );
-        dom.root.findByType('span').props.onClick();
+        result.current(undefined as any);
+
         expect(dispatcher).toHaveBeenCalledTimes(1);
         expect(dispatcher).toBeCalledWith(shisellDispatcher);
     });
 
     it('Returns new event handler only when deps or context changes', () => {
-        const TestComponent = (props: {value: number}) => {
-            const onClick = useEventAnalytic(() => {}, null, [props.value]);
+        const Wrapper: FunctionComponent<{context?: any; value: number}> = ({context, children}) =>
+            context ? <ShisellContext.Provider value={context}>{children}</ShisellContext.Provider> : <>{children}</>;
 
-            return <span onClick={onClick} />;
-        };
+        const {result, rerender} = renderHook(({value}) => useEventAnalytic(() => {}, null, [value]), {
+            wrapper: Wrapper,
+            initialProps: {value: 1},
+        });
 
-        const dom = renderer.create(<TestComponent value={1} />);
-        const onClick1 = dom.root.findByType('span').props.onClick;
+        rerender({value: 1});
 
-        dom.update(<TestComponent value={1} />);
-        const onClick2 = dom.root.findByType('span').props.onClick;
+        rerender({value: 2});
 
-        dom.update(<TestComponent value={2} />);
-        const onClick3 = dom.root.findByType('span').props.onClick;
+        rerender({value: 2, context: {dispatcher: jest.fn()}});
 
-        dom.update(
-            <ShisellContext.Provider value={{dispatcher: jest.fn() as any}}>
-                <TestComponent value={2} />
-            </ShisellContext.Provider>,
-        );
-        const onClick4 = dom.root.findByType('span').props.onClick;
-
-        expect(onClick1).toBe(onClick2);
-        expect(onClick2).not.toBe(onClick3);
-        expect(onClick3).not.toBe(onClick4);
+        expect(result.all[0]).toBe(result.all[1]);
+        expect(result.all[1]).not.toBe(result.all[2]);
+        expect(result.all[2]).not.toBe(result.all[3]);
+        result.all.forEach((fn) => expect(fn).toEqual(expect.any(Function)));
     });
 });

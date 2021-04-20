@@ -1,5 +1,5 @@
+import {render} from '@testing-library/react';
 import React from 'react';
-import renderer from 'react-test-renderer';
 import Analytics from '../analytics';
 import {runImmediate} from '../testUtils';
 import {withOnPropChangedAnalytic} from './with-on-prop-changed-analytic';
@@ -26,11 +26,11 @@ describe('withOnPropChangedAnalytic', () => {
             Empty,
         );
 
-        const result = renderer.create(<EnhancedComponent prop1={1} />);
+        const {rerender} = render(<EnhancedComponent prop1={1} />);
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(0);
 
-        result.update(<EnhancedComponent prop1={2} />);
+        rerender(<EnhancedComponent prop1={2} />);
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
         expect(writer).toHaveBeenCalledWith(
@@ -45,11 +45,11 @@ describe('withOnPropChangedAnalytic', () => {
             Empty,
         );
 
-        const result = renderer.create(<EnhancedComponent prop1={1} />);
+        const {rerender} = render(<EnhancedComponent prop1={1} />);
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(0);
 
-        result.update(<EnhancedComponent prop1={1} />);
+        rerender(<EnhancedComponent prop1={1} />);
         await runImmediate();
         expect(writer).not.toHaveBeenCalled();
     });
@@ -61,11 +61,11 @@ describe('withOnPropChangedAnalytic', () => {
             valueFilter: falseProvider,
         })(Empty);
 
-        const result = renderer.create(<EnhancedComponent prop1={1} />);
+        const {rerender} = render(<EnhancedComponent prop1={1} />);
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(0);
 
-        result.update(<EnhancedComponent prop1={2} />);
+        rerender(<EnhancedComponent prop1={2} />);
         await runImmediate();
         expect(writer).not.toHaveBeenCalled();
     });
@@ -78,7 +78,7 @@ describe('withOnPropChangedAnalytic', () => {
             valueFilter: (_, b) => b,
         })(Empty);
 
-        renderer.create(<EnhancedComponent prop1={1} />);
+        render(<EnhancedComponent prop1={1} />);
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
     });
@@ -91,7 +91,7 @@ describe('withOnPropChangedAnalytic', () => {
             valueFilter: (_, b) => b,
         })(Empty);
 
-        renderer.create(<EnhancedComponent />);
+        render(<EnhancedComponent />);
         await runImmediate();
         expect(writer).not.toHaveBeenCalled();
     });
@@ -103,7 +103,7 @@ describe('withOnPropChangedAnalytic', () => {
             includeFirstValue: true,
         })(Empty);
 
-        renderer.create(<EnhancedComponent />);
+        render(<EnhancedComponent />);
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
     });

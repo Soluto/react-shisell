@@ -1,5 +1,5 @@
+import {render} from '@testing-library/react';
 import React, {FunctionComponent} from 'react';
-import renderer from 'react-test-renderer';
 import Analytics from '../analytics';
 import {runImmediate} from '../testUtils';
 import {withAnalyticOnEvent} from './with-analytic-on-event';
@@ -25,7 +25,7 @@ describe('withAnalyticOnEvent', () => {
             analyticName: 'TestAnalytic',
         })(BaseComponent);
 
-        renderer.create(<EnhancedComponent />);
+        render(<EnhancedComponent />);
 
         await runImmediate();
 
@@ -43,7 +43,7 @@ describe('withAnalyticOnEvent', () => {
             analyticName: 'TestAnalytic',
         })(BaseComponent);
 
-        renderer.create(<EnhancedComponent shouldDispatchAnalytics={false} />);
+        render(<EnhancedComponent shouldDispatchAnalytics={false} />);
 
         await runImmediate();
 
@@ -57,7 +57,7 @@ describe('withAnalyticOnEvent', () => {
             analyticName: 'TestAnalytic',
         })(BaseComponent);
 
-        renderer.create(<EnhancedComponent onClick={eventHandler} />);
+        render(<EnhancedComponent onClick={eventHandler} />);
 
         await runImmediate();
 
@@ -77,7 +77,7 @@ describe('withAnalyticOnEvent', () => {
             analyticName: 'TestAnalytic',
         })(BaseComponent);
 
-        renderer.create(<EnhancedComponent analyticsExtras={{Name: 'Me'}} />);
+        render(<EnhancedComponent analyticsExtras={{Name: 'Me'}} />);
 
         await runImmediate();
 
@@ -98,7 +98,7 @@ describe('withAnalyticOnEvent', () => {
             analyticName: 'TestAnalytic',
         })(BaseComponent);
 
-        renderer.create(<EnhancedComponent analyticsExtras={(e) => ({Source: e.source})} />);
+        render(<EnhancedComponent analyticsExtras={(e) => ({Source: e.source})} />);
 
         await runImmediate();
 
@@ -119,7 +119,7 @@ describe('withAnalyticOnEvent', () => {
             analyticName: 'TestAnalytic',
         })(BaseComponent);
 
-        renderer.create(<EnhancedComponent analyticsIdentities={{User: 'Me'}} />);
+        render(<EnhancedComponent analyticsIdentities={{User: 'Me'}} />);
 
         await runImmediate();
 
@@ -140,7 +140,7 @@ describe('withAnalyticOnEvent', () => {
             analyticName: 'TestAnalytic',
         })(BaseComponent);
 
-        renderer.create(<EnhancedComponent analyticsIdentities={(e) => ({User: e.user})} />);
+        render(<EnhancedComponent analyticsIdentities={(e) => ({User: e.user})} />);
 
         await runImmediate();
 
@@ -164,7 +164,7 @@ describe('withAnalyticOnEvent', () => {
             },
         })(BaseComponent);
 
-        renderer.create(<EnhancedComponent />);
+        render(<EnhancedComponent />);
 
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
@@ -187,7 +187,7 @@ describe('withAnalyticOnEvent', () => {
             },
         })(BaseComponent);
 
-        renderer.create(<EnhancedComponent />);
+        render(<EnhancedComponent />);
 
         await runImmediate();
 
@@ -211,7 +211,7 @@ describe('withAnalyticOnEvent', () => {
             identities: undefined,
         })(BaseComponent);
 
-        renderer.create(
+        render(
             <EnhancedComponent
                 analyticsExtras={undefined}
                 // @ts-expect-error

@@ -1,5 +1,5 @@
+import {render} from '@testing-library/react';
 import React from 'react';
-import renderer from 'react-test-renderer';
 import Analytics from '../analytics';
 import {runImmediate} from '../testUtils';
 import {withAnalyticOnView} from './with-analytic-on-view';
@@ -17,7 +17,7 @@ describe('withAnalyticOnMount', () => {
             analyticName: 'TestAnalytic',
         })(Empty);
 
-        renderer.create(<EnhancedComponent />);
+        render(<EnhancedComponent />);
 
         await runImmediate();
 
@@ -35,11 +35,11 @@ describe('withAnalyticOnMount', () => {
             predicate: jest.fn().mockReturnValueOnce(false).mockReturnValueOnce(true),
         })(Empty);
 
-        const result = renderer.create(<EnhancedComponent />);
+        const {rerender} = render(<EnhancedComponent />);
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(0);
 
-        result.update(<EnhancedComponent />);
+        rerender(<EnhancedComponent />);
         await runImmediate();
         expect(writer).toHaveBeenCalledTimes(1);
         expect(writer).toHaveBeenCalledWith(
@@ -55,8 +55,10 @@ describe('withAnalyticOnMount', () => {
             mapPropsToIdentities: () => ({sessionId: 'a1b2c3', deviceId: 'd4e5f6'}),
         })(Empty);
 
-        renderer.create(<EnhancedComponent />);
+        render(<EnhancedComponent />);
+
         await runImmediate();
+
         expect(writer).toHaveBeenCalledTimes(1);
         expect(writer).toHaveBeenCalledWith(
             expect.objectContaining({

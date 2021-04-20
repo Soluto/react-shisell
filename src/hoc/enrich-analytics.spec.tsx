@@ -1,11 +1,10 @@
-import React from 'react';
-import renderer from 'react-test-renderer';
-import Analytics from '../analytics';
-import {runImmediate} from '../testUtils';
-import {ShisellContext} from '../shisell-context';
-import {enrichAnalytics} from './enrich-analytics';
+import {render} from '@testing-library/react';
+import React, {useContext} from 'react';
 import {createScoped} from 'shisell/extenders';
-import {useContext} from 'react';
+import Analytics from '../analytics';
+import {ShisellContext} from '../shisell-context';
+import {runImmediate} from '../testUtils';
+import {enrichAnalytics} from './enrich-analytics';
 
 const AnalyticsSender = () => {
     const analytics = useContext(ShisellContext);
@@ -25,7 +24,7 @@ describe('enrichAnalytics', () => {
             AnalyticsSender,
         );
 
-        renderer.create(<EnhancedComponent />);
+        render(<EnhancedComponent />);
 
         await runImmediate();
 
