@@ -7,15 +7,16 @@ describe('withAnalytics', () => {
     const ANALYTICS: any = 'some analytics';
 
     it('Adds analytics to props', () => {
-        const InnerComponent = (props: WithAnalyticsProps) => {
-            expect(props).toEqual({analytics: ANALYTICS});
+        const expectedProps = {a: 'a', b: 'b'};
+        const InnerComponent = (props: WithAnalyticsProps & typeof expectedProps) => {
+            expect(props).toEqual({...expectedProps, analytics: ANALYTICS});
             return null;
         };
         const EnhancedComponent = withAnalytics(InnerComponent);
 
         render(
             <ShisellContext.Provider value={ANALYTICS}>
-                <EnhancedComponent />
+                <EnhancedComponent {...expectedProps} />
             </ShisellContext.Provider>,
         );
 
