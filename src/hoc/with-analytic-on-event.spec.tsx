@@ -5,17 +5,18 @@ import {runImmediate} from '../testUtils';
 import {withAnalyticOnEvent} from './with-analytic-on-event';
 import {withExtras} from 'shisell/extenders';
 
+type Event = {source: string; user: string};
+type Props = {onClick: (e: Event) => void};
+
 describe('withAnalyticOnEvent', () => {
     const writer = jest.fn();
-    const BaseComponent: FunctionComponent<{onClick: (e: {source: string; user: string}) => void}> = jest.fn(
-        (props) => {
-            props.onClick({
-                source: 'MyBaseComponent',
-                user: 'McCree',
-            });
-            return null;
-        },
-    );
+    const BaseComponent: FunctionComponent<Props> = jest.fn((props) => {
+        props.onClick({
+            source: 'MyBaseComponent',
+            user: 'McCree',
+        });
+        return null;
+    });
 
     beforeAll(() => Analytics.setWriter(writer));
     beforeEach(() => writer.mockReset());
@@ -131,7 +132,7 @@ describe('withAnalyticOnEvent', () => {
         const EnhancedComponent = withAnalyticOnEvent({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
-            extendAnalytics: (_, e) => withExtras({Source: e.source}),
+            extendAnalytics: (_: {}, e: Event) => withExtras({Source: e.source}),
         })(BaseComponent);
 
         render(<EnhancedComponent />);
@@ -150,7 +151,7 @@ describe('withAnalyticOnEvent', () => {
     });
 
     it('Correctly ignores nulls in extenders', async () => {
-        const EnhancedComponent = withAnalyticOnEvent({
+        const EnhancedComponent = withAnalyticOnEvent<'onClick', Props>({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
             // @ts-expect-error
