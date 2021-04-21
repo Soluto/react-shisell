@@ -151,7 +151,7 @@ describe('withAnalyticOnEvent', () => {
     });
 
     it('Correctly ignores nulls in extenders', async () => {
-        const EnhancedComponent = withAnalyticOnEvent<'onClick', Props>({
+        const EnhancedComponent = withAnalyticOnEvent({
             eventName: 'onClick',
             analyticName: 'TestAnalytic',
             // @ts-expect-error

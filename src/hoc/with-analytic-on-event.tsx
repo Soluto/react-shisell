@@ -3,50 +3,44 @@ import {AnalyticsExtender} from 'shisell';
 import {useAnalytics} from '../hooks/use-analytics';
 import {wrapDisplayName} from '../wrapDisplayName';
 
-type AnyFn = (...args: any[]) => any;
+type AnyFn<Args extends any[]> = (...args: Args) => void;
 
 export type ExtendEventAnalytics<Params extends any[]> = (...params: Params) => AnalyticsExtender<void>;
 
-export type WithAnalyticOnEventConfiguration<EventName extends string> = {
+export type WithAnalyticOnEventConfiguration<
+    EventName extends string,
+    EventParams extends any[],
+    Props extends Record<EventName, AnyFn<EventParams>>
+> = {
     eventName: EventName;
     analyticName: string;
+    extendAnalytics?: ExtendEventAnalytics<[Omit<Props, EventName>, ...EventParams]>;
 };
-
-type ExtenderConfig<EventName extends string, Props extends Record<EventName, AnyFn>> = {
-    extendAnalytics: ExtendEventAnalytics<[Omit<Props, EventName>, ...Parameters<Props[EventName]>]>;
-};
-
-export type WithAnalyticOnEventConfigurationWithExtender<
-    EventName extends string,
-    Props extends Record<EventName, AnyFn>
-> = WithAnalyticOnEventConfiguration<EventName> & ExtenderConfig<EventName, Props>;
 
 export interface WithAnalyticOnEventProps<Params extends any[]> {
     extendAnalytics?: ExtendEventAnalytics<Params>;
     shouldDispatchAnalytics?: boolean | ((...params: Params) => boolean);
 }
 
-type CombinedProps<EventName extends string, Props extends Record<EventName, AnyFn>> = Omit<Props, EventName> &
+type CombinedProps<
+    EventName extends string,
+    EventParams extends any[],
+    Props extends Record<EventName, AnyFn<EventParams>>
+> = Omit<Props, EventName> &
     Partial<Record<EventName, Props[EventName] | undefined>> &
     WithAnalyticOnEventProps<Parameters<Props[EventName]>>;
 
-export function withAnalyticOnEvent<EventName extends string>(
-    config: WithAnalyticOnEventConfiguration<EventName>,
-): <Props extends Record<EventName, AnyFn>>(
-    Component: ElementType<Props>,
-) => FunctionComponent<CombinedProps<EventName, Props>>;
-
-export function withAnalyticOnEvent<EventName extends string, BaseProps extends Record<EventName, AnyFn>>(
-    config: WithAnalyticOnEventConfigurationWithExtender<EventName, BaseProps>,
-): <Props extends BaseProps>(Component: ElementType<Props>) => FunctionComponent<CombinedProps<EventName, Props>>;
-
-export function withAnalyticOnEvent<EventName extends string, BaseProps extends Record<EventName, AnyFn>>({
+export function withAnalyticOnEvent<
+    EventName extends string,
+    EventParams extends any[],
+    BaseProps extends Record<EventName, AnyFn<EventParams>>
+>({
     eventName,
     analyticName,
     extendAnalytics: extendAnalyticsFromConfig,
-}: WithAnalyticOnEventConfiguration<EventName> & Partial<ExtenderConfig<EventName, BaseProps>>) {
+}: WithAnalyticOnEventConfiguration<EventName, EventParams, BaseProps>) {
     return <Props extends BaseProps>(BaseComponent: ElementType<Props>) => {
-        const EnhancedComponent: FunctionComponent<CombinedProps<EventName, Props>> = ({
+        const EnhancedComponent: FunctionComponent<CombinedProps<EventName, EventParams, Props>> = ({
             [eventName]: rawEvent,
             extendAnalytics,
             shouldDispatchAnalytics,
