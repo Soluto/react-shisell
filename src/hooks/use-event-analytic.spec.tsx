@@ -14,7 +14,7 @@ describe('withAnalyticOnEvent', () => {
 
         const {result} = renderHook(() => useEventAnalytic(dispatcher));
 
-        result.current(undefined as any);
+        result.current();
 
         expect(dispatcher).toHaveBeenCalledTimes(1);
     });
@@ -22,13 +22,16 @@ describe('withAnalyticOnEvent', () => {
     it('Both dispatcher and inner event handler are called when event is triggered', () => {
         const eventHandler = jest.fn();
         const dispatcher = jest.fn();
+        const expectedArgs = [1, 2, 3];
 
         const {result} = renderHook(() => useEventAnalytic(dispatcher, eventHandler));
 
-        result.current(undefined);
+        result.current(...expectedArgs);
 
         expect(dispatcher).toHaveBeenCalledTimes(1);
+        expect(dispatcher).toHaveBeenCalledWith(expect.anything(), ...expectedArgs);
         expect(eventHandler).toHaveBeenCalledTimes(1);
+        expect(eventHandler).toHaveBeenCalledWith(...expectedArgs);
     });
 
     it('Dispatcher gets shisell dispatcher from context', () => {
@@ -40,30 +43,49 @@ describe('withAnalyticOnEvent', () => {
             initialProps: {value: {dispatcher: shisellDispatcher as any}},
         });
 
-        result.current(undefined as any);
+        result.current();
 
         expect(dispatcher).toHaveBeenCalledTimes(1);
         expect(dispatcher).toBeCalledWith(shisellDispatcher);
     });
 
-    it('Returns new event handler only when deps or context changes', () => {
-        const Wrapper: FunctionComponent<{context?: any; value: number}> = ({context, children}) =>
-            context ? <ShisellContext.Provider value={context}>{children}</ShisellContext.Provider> : <>{children}</>;
+    it('Use latest callbacks after render', () => {
+        const {result, rerender} = renderHook(() => {
+            const eventHandler = jest.fn();
+            const dispatcher = jest.fn();
 
-        const {result, rerender} = renderHook(({value}) => useEventAnalytic(() => {}, null, [value]), {
-            wrapper: Wrapper,
-            initialProps: {value: 1},
+            const wrappedEvent = useEventAnalytic(dispatcher, eventHandler);
+
+            return {eventHandler, dispatcher, wrappedEvent};
         });
 
-        rerender({value: 1});
+        const assert = () => {
+            result.current.wrappedEvent();
+            expect(result.current.dispatcher).toHaveBeenCalledTimes(1);
+            expect(result.current.eventHandler).toHaveBeenCalledTimes(1);
+        };
 
-        rerender({value: 2});
+        assert();
 
-        rerender({value: 2, context: {dispatcher: jest.fn()}});
+        rerender();
+
+        assert();
+    });
+
+    it('Returns new event handler only when context changes', () => {
+        const Wrapper: FunctionComponent<{context?: any}> = ({context, children}) =>
+            context ? <ShisellContext.Provider value={context}>{children}</ShisellContext.Provider> : <>{children}</>;
+
+        const {result, rerender} = renderHook(() => useEventAnalytic(jest.fn(), jest.fn()), {
+            wrapper: Wrapper,
+        });
+
+        rerender();
+
+        rerender({context: {dispatcher: jest.fn()}});
 
         expect(result.all[0]).toBe(result.all[1]);
         expect(result.all[1]).not.toBe(result.all[2]);
-        expect(result.all[2]).not.toBe(result.all[3]);
         result.all.forEach((fn) => expect(fn).toEqual(expect.any(Function)));
     });
 });
