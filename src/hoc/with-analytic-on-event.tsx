@@ -7,11 +7,7 @@ type AnyFn<Args extends any[]> = (...args: Args) => any;
 
 export type ExtendEventAnalytics<Params extends any[]> = (...params: Params) => AnalyticsExtender<void>;
 
-export type WithAnalyticOnEventConfiguration<
-    EventName extends string,
-    EventParams extends any[],
-    Props extends Record<EventName, AnyFn<EventParams>>
-> = {
+export type WithAnalyticOnEventConfiguration<EventName extends string, EventParams extends any[], Props> = {
     eventName: EventName;
     analyticName: string;
     extendAnalytics?: ExtendEventAnalytics<[Omit<Props, EventName>, ...EventParams]>;
@@ -22,15 +18,13 @@ export interface WithAnalyticOnEventProps<Params extends any[]> {
     shouldDispatchAnalytics?: boolean | ((...params: Params) => boolean);
 }
 
-type CombinedProps<EventName extends string, Props extends Record<EventName, AnyFn<any[]>>> = Omit<Props, EventName> &
-    Partial<Record<EventName, Props[EventName] | undefined>> &
-    WithAnalyticOnEventProps<Parameters<Props[EventName]>>;
+type CombinedProps<EventName extends string, Props> = Props extends Record<EventName, any>
+    ? Omit<Props, EventName> &
+          Partial<Record<EventName, Props[EventName] | undefined>> &
+          WithAnalyticOnEventProps<Parameters<Props[EventName]>>
+    : Props & WithAnalyticOnEventProps<[]>;
 
-export function withAnalyticOnEvent<
-    EventName extends string,
-    EventParams extends any[],
-    BaseProps extends Record<EventName, AnyFn<EventParams>>
->({
+export function withAnalyticOnEvent<EventName extends string, EventParams extends any[], BaseProps>({
     eventName,
     analyticName,
     extendAnalytics: extendAnalyticsFromConfig,
@@ -45,21 +39,19 @@ export function withAnalyticOnEvent<
             const onEvent = useEventAnalytic((dispatcher, ...args) => {
                 const shouldDispatch =
                     typeof shouldDispatchAnalytics === 'function'
-                        ? shouldDispatchAnalytics(...args)
+                        ? (shouldDispatchAnalytics as AnyFn<any[]>)(...args)
                         : shouldDispatchAnalytics == null || shouldDispatchAnalytics;
 
                 if (shouldDispatch) {
                     if (extendAnalyticsFromConfig) {
-                        dispatcher = dispatcher.extend(
-                            extendAnalyticsFromConfig(props as Omit<Props, EventName>, ...args),
-                        );
+                        dispatcher = dispatcher.extend((extendAnalyticsFromConfig as AnyFn<any[]>)(props, ...args));
                     }
                     if (extendAnalytics) {
-                        dispatcher = dispatcher.extend(extendAnalytics(...args));
+                        dispatcher = dispatcher.extend((extendAnalytics as AnyFn<any[]>)(...args));
                     }
                     dispatcher.dispatch(analyticName);
                 }
-            }, rawEvent as Props[EventName]);
+            }, rawEvent as AnyFn<any[]>);
 
             // @ts-ignore
             return <BaseComponent {...{[eventName]: onEvent}} {...props} />;
